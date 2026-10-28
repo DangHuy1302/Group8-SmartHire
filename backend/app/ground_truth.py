@@ -188,13 +188,17 @@ def evaluate_matching_model(engine, threshold: float = 45.0) -> Dict:
         "false_negatives": fn,
         "pairs": evaluated_pairs,
         "methodology": (
-            "Sử dụng tập kiểm thử 12 cặp CV/JD được gán nhãn thực tế đại diện cho các vị trí: Backend, "
-            "Frontend, Data/BI, DevOps, Machine Learning và các trường hợp trái ngành/mất cân xứng kỹ năng. "
-            f"Ngưỡng quyết định nhị phân được đặt tại {threshold} điểm (Matching Score >= {threshold} được coi là phù hợp)."
+            f"Đánh giá trên tập benchmark gồm 12 cặp CV/JD mẫu (7 cặp phù hợp, 5 cặp không phù hợp/trái ngành). "
+            f"Ngưỡng quyết định nhị phân mặc định được đặt tại {threshold} điểm (Score >= {threshold} dự đoán Match). "
+            f"Lưu ý quan trọng: Ngưỡng {threshold} được xác định dựa trên quan sát phân bố điểm của chính tập benchmark này, "
+            f"vì vậy tồn tại nguy cơ thiên lệch tối ưu (optimization bias). Đây là bài kiểm chứng tính đúng đắn thuật toán (Sanity Check), "
+            f"chưa phải là kiểm thử mù trên tập dữ liệu thực tế độc lập."
         ),
         "limitations": [
-            "Mô hình TF-IDF dựa trên tần suất từ vựng, chưa hiểu sâu sắc các từ đồng nghĩa chưa có trong từ điển.",
-            "Phương pháp trích xuất kỹ năng bằng Regex từ điển có thể bị giới hạn nếu ứng viên dùng thuật ngữ viết tắt quá đặc thù.",
-            "Trọng số cố định (60% TF-IDF, 40% Kỹ năng) là giả định thiết kế ban đầu, có thể tinh chỉnh theo từng nhóm ngành nghề."
+            "Quy mô tập đánh giá nhỏ (12 cặp mẫu), có độ tương phản kỹ năng cao giữa các nhóm ngành nên kết quả đạt 100% chưa phản ánh hết độ nhiễu thực tế.",
+            "Mô hình TF-IDF phân tích dựa trên tần suất từ vựng, chưa nắm bắt ngữ nghĩa sâu hoặc từ đồng nghĩa ngoài từ điển.",
+            "Phương pháp trích xuất kỹ năng bằng Regex từ điển phụ thuộc vào bộ từ khóa và các bí danh được định nghĩa trước.",
+            "Trọng số 60% TF-IDF / 40% Kỹ năng là giả định thiết kế ban đầu, cần được tối ưu hóa tự động (ML tuning) khi triển khai thực tế."
         ]
     }
+

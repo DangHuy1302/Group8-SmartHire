@@ -131,28 +131,31 @@
 🖥 **Màn hình mở**: Bấm chuyển sang **Tab 4: 4. Kiểm thử & Đánh giá**
 
 #### Thao tác trên màn hình:
-1. Rê chuột vào 4 ô chỉ số thực nghiệm: **Accuracy (91.7%)**, **Precision (100.0%)**, **Recall (85.7%)**, **F1-Score (92.3%)**.
-2. Rê chuột vào **Ma trận nhầm lẫn (Confusion Matrix)**: Chỉ rõ TP = 6, TN = 5, FP = 0, FN = 1.
-3. Kéo thử thanh trượt **Ngưỡng (Threshold)** từ 45 sang 50: Xem các chỉ số cập nhật lại ngay lập tức theo đúng phép tính toán học.
-4. Cuộn xuống **Bảng chi tiết 12 cặp kiểm thử thực nghiệm**: Lướt qua các dòng có cột Ground Truth và Score thực tế.
+1. Rê chuột vào 4 ô chỉ số thực nghiệm đo trực tiếp từ API backend: **Accuracy (100.0%)**, **Precision (100.0%)**, **Recall (100.0%)**, **F1-Score (100.0%)**.
+2. Rê chuột vào **Ma trận nhầm lẫn (Confusion Matrix)**: Chỉ rõ TP = 7, TN = 5, FP = 0, FN = 0.
+3. Kéo thử thanh trượt **Ngưỡng (Threshold)**:
+   - Tại ngưỡng 45: Toàn bộ 12 ca đều đúng (7 Match có điểm từ 69.4%–77.6% $\ge 45$; 5 Mismatch có điểm từ 0.0%–11.0% $< 45$).
+   - Kéo thử lên mức 70: Thấy điểm cặp #11 (69.4%) rơi xuống dưới ngưỡng, Recall giảm xuống 85.7% và F1 cập nhật tức thì. Sau đó kéo lại về 45.
+4. Cuộn xuống **Bảng chi tiết 12 cặp kiểm thử thực nghiệm**: Rê chuột qua các dòng, chỉ vào cột Ground Truth và Score thực tế.
 5. Cuộn xuống phần **Bộ kiểm thử hệ thống (Automated Pytest Suite)**:
    - Nhấn nút **"Chạy kiểm thử trực tiếp"** màu tím.
    - Chờ 2 giây: Khung Terminal màu đen xuất hiện với dòng chữ xanh lá: `12 passed in ...s`, Exit code: 0.
-6. Mở rộng phần nhận xét về ưu điểm, hạn chế và hướng cải thiện.
+6. Rê chuột vào hộp lưu ý màu vàng: Đọc phần nhận định về tính khách quan và hạn chế của tập benchmark nhỏ.
 
 #### Lời thoại thuyết minh:
 > *"Tiếp theo là **Checklist 4 và Checklist 5: Kiểm thử và Đánh giá hệ thống**.*
 >
-> *Để đảm bảo tính trung thực và khoa học, nhóm cam kết **không bịa đặt bất kỳ con số đánh giá nào**. Nhóm đã xây dựng tập kiểm thử thực nghiệm gồm **12 cặp CV/JD được gán nhãn Ground Truth thực tế** (7 cặp Match và 5 cặp Mismatch).*
+> *Để đảm bảo tính trung thực và khoa học, nhóm cam kết **không bịa đặt bất kỳ con số đánh giá nào** và toàn bộ số liệu đều được tính toán động từ backend. Nhóm đã xây dựng tập kiểm thử thực nghiệm gồm **12 cặp CV/JD được gán nhãn Ground Truth thực tế** (7 cặp Match và 5 cặp Mismatch).*
 >
-> *Khi thiết lập ngưỡng phân loại nhị phân ở mức 45 điểm:*
-> - *Độ chính xác Accuracy đạt **91.7%**.*
-> - *Độ chuẩn xác Precision đạt tuyệt đối **100.0%**, nghĩa là khi hệ thống gợi ý phù hợp thì ứng viên đó chắc chắn đạt tiêu chuẩn, không có ca dương tính giả (FP = 0).*
-> - *Độ bao phủ Recall đạt **85.7%** và điểm F1-Score đạt mức rất cao là **92.3%**.*
+> *Khi thiết lập ngưỡng phân loại nhị phân mặc định ở mức 45 điểm:*
+> - *Cả 7 ứng viên phù hợp đều đạt Matching Score từ 69.4% đến 77.6% (vượt ngưỡng 45), cho ra **7 True Positives**.*
+> - *Cả 5 ứng viên trái ngành hoặc thiếu kỹ năng chỉ đạt Matching Score từ 0.0% đến 11.0% (nằm sâu dưới ngưỡng 45), cho ra **5 True Negatives**.*
+> - *Không có ca báo nhầm (FP = 0) và không bỏ sót hồ sơ nào (FN = 0).*
+> - *Do đó, trên tập 12 mẫu kiểm chứng này, các chỉ số đạt **Accuracy 100%, Precision 100%, Recall 100% và F1-Score 100%**.*
 >
-> *Đặc biệt, hệ thống tích hợp sẵn bộ kiểm thử tự động gồm **12 test cases** viết bằng `pytest` kiểm tra toàn diện từ cấu trúc database, logic phễu đến các trường hợp biên như CV rỗng hay kỹ năng không trùng khớp. Em xin bấm nút 'Chạy kiểm thử trực tiếp' ngay tại giao diện: như Thầy thấy, toàn bộ 12/12 bài test đều vượt qua (PASSED 100%) mà không có bất kỳ lỗi nào.*
+> *Tuy nhiên, nhóm xin giải thích rõ ràng về mặt học thuật: **Kết quả 100% này đạt được trên bộ 12 mẫu benchmark có độ tương phản kỹ năng cao**. Việc xác định ngưỡng 45 dựa trên quan sát phân bố của chính tập dữ liệu này tiềm ẩn nguy cơ **thiên lệch tối ưu (optimization bias)**. Đây là bài kiểm chứng tính đúng đắn thuật toán (Sanity Check), chưa phải là kiểm thử trên tập dữ liệu thực tế quy mô lớn vốn có nhiều độ nhiễu và ca biên phức tạp hơn.*
 >
-> *Về mặt hạn chế: Do sử dụng TF-IDF nên mô hình phụ thuộc vào từ vựng và cần bộ từ điển kỹ năng cập nhật thường xuyên. Hướng phát triển tiếp theo của nhóm là tích hợp mô hình nhúng câu nhẹ Sentence-Transformers và tự động học trọng số bằng Logistic Regression."*
+> *Đặc biệt, hệ thống tích hợp sẵn bộ kiểm thử tự động gồm **12 test cases** viết bằng `pytest` kiểm tra toàn diện từ cấu trúc database, logic phễu đến các trường hợp biên như CV rỗng hay kỹ năng không trùng khớp. Em xin bấm nút 'Chạy kiểm thử trực tiếp' ngay tại giao diện: như Thầy thấy, toàn bộ 12/12 bài test đều vượt qua (PASSED 100%) mà không có bất kỳ lỗi nào."*
 
 ---
 
@@ -180,5 +183,6 @@
 
 ## III. MẸO QUAN TRỌNG ĐỂ ĐẠT ĐIỂM TỐI ĐA KHI QUAY
 1. **Nói chậm rãi, tự tin**: Tránh đọc quá nhanh; di chuyển con trỏ chuột đến đúng vị trí biểu đồ hoặc số liệu đang nói để người xem dễ quan sát.
-2. **Không bỏ qua bằng chứng**: Khi nói đến F1-Score 92.3% hay 12 test cases, bắt buộc phải để màn hình hiển thị bảng số liệu hoặc bấm nút chạy test để có bằng chứng chạy thật.
+2. **Không bỏ qua bằng chứng**: Khi nói đến F1-Score 100% (trên 12 mẫu) hay 12 test cases, bắt buộc phải để màn hình hiển thị bảng số liệu hoặc bấm nút chạy test để có bằng chứng chạy thật.
 3. **Thời gian chuẩn**: Căn đồng hồ sao cho video kết thúc trong khoảng từ 11 đến 13 phút.
+

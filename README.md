@@ -124,12 +124,14 @@ Hoặc truy cập **Màn hình 4** trên giao diện web và bấm nút **"Chạ
 
 ## 📊 KẾT QUẢ ĐÁNH GIÁ THỰC TẾ (GROUND TRUTH EVALUATION)
 
-Đánh giá thực nghiệm trên 12 cặp CV/JD được gán nhãn đại diện cho các trường hợp phù hợp và trái ngành (Ngưỡng Threshold = 45.0 điểm):
-- **Accuracy (Độ chính xác)**: **91.7%**
+Đánh giá thực nghiệm qua API `/api/v1/testing/evaluation` trên 12 cặp CV/JD chuẩn hóa (7 cặp phù hợp Match, 5 cặp không phù hợp Mismatch) với ngưỡng mặc định Threshold = 45.0 điểm:
+- **Accuracy (Độ chính xác)**: **100.0%** (12/12 cặp dự đoán đúng)
 - **Precision (Độ chuẩn xác)**: **100.0%**
-- **Recall (Độ bao phủ)**: **85.7%**
-- **F1-Score**: **92.3%**
-- **Confusion Matrix**: TP = 6, TN = 5, FP = 0, FN = 1.
+- **Recall (Độ bao phủ)**: **100.0%**
+- **F1-Score**: **100.0%**
+- **Confusion Matrix**: TP = 7, TN = 5, FP = 0, FN = 0.
+
+> ⚠️ **Lưu ý khoa học**: Kết quả 100% đạt được trên tập benchmark kiểm chứng 12 cặp mẫu do các ca phù hợp (điểm 69.4%–77.6%) và trái ngành (điểm 0.0%–11.0%) có độ tương phản kỹ năng rất rõ nét. Ngưỡng 45.0 được xác định dựa trên phân bố của chính tập dữ liệu này nên tiềm ẩn nguy cơ thiên lệch tối ưu (optimization bias). Đây là bài kiểm chứng thuật toán (Sanity Check), chưa phản ánh đầy đủ độ nhiễu trên dữ liệu tuyển dụng thực tế quy mô lớn.
 
 ---
 
@@ -143,3 +145,4 @@ Xem chi tiết từng phút, câu thoại thuyết minh và thao tác tại:
 ## 👥 THÀNH VIÊN GROUP 8
 - Toàn bộ thành viên Group 8 tham gia thiết kế, lập trình backend, frontend, mô hình ML, kiểm thử và quay video demo.
 - Dự án sẵn sàng bàn giao qua GitHub, không chứa mã bí mật hoặc API keys nhạy cảm.
+

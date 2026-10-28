@@ -187,11 +187,15 @@ export const TestingTab: React.FC = () => {
                   {evaluation.methodology}
                 </p>
                 <div className="pt-2 border-t border-slate-200 space-y-1">
-                  <span className="font-semibold text-slate-700">Đánh giá chung:</span>
+                  <span className="font-semibold text-slate-700">Đánh giá khách quan:</span>
                   <p>
-                    Mô hình đạt điểm F1 cao nhờ sự kết hợp chặt chẽ giữa tương đồng ngữ nghĩa TF-IDF và tỷ lệ kỹ năng. 
-                    Khi ngưỡng đặt ở mức 40-50 điểm, hệ thống phân loại chính xác các cặp cùng lĩnh vực chuyên môn 
-                    và loại trừ hiệu quả các hồ sơ trái ngành hoặc thiếu hụt công nghệ cốt lõi.
+                    Trên tập 12 cặp kiểm thử mẫu, thuật toán phân loại đạt <strong>Accuracy 100% và F1-Score 100%</strong> (TP=7, TN=5, FP=0, FN=0) 
+                    do các hồ sơ phù hợp đạt điểm cao (69.4% – 77.6%) và các hồ sơ trái ngành có điểm rất thấp (0.0% – 11.0%).
+                  </p>
+                  <p className="text-[11px] text-amber-700 font-medium bg-amber-50 p-2 rounded border border-amber-200 mt-1">
+                    ⚠️ <strong>Lưu ý học thuật:</strong> Kết quả 100% này chỉ phản ánh hiệu quả trên bộ 12 mẫu kiểm chứng có độ phân tách rõ nét. 
+                    Việc lựa chọn ngưỡng 45 điểm dựa trên phân bố của chính tập dữ liệu này tiềm ẩn nguy cơ thiên lệch tối ưu (optimization bias) 
+                    và chưa chứng minh độ chính xác tương đương trên môi trường tuyển dụng thực tế quy mô lớn.
                   </p>
                 </div>
               </div>
@@ -365,3 +369,4 @@ export const TestingTab: React.FC = () => {
     </div>
   );
 };
+
