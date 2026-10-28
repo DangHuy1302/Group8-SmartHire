@@ -1,0 +1,17 @@
+# Python
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+*.db-journal
+
+# Node
+node_modules/
+frontend/node_modules/
+frontend/dist/
+dist/
+.DS_Store
+
+# OS
+Thumbs.db
