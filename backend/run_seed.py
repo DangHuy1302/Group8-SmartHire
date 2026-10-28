@@ -12,3 +12,4 @@ if __name__ == "__main__":
     print("Bắt đầu khởi tạo và nạp dữ liệu mẫu SmartHire Mini...")
     seed_database()
     print("Hoàn tất!")
+

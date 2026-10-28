@@ -4,14 +4,15 @@
 **Môn học**: Hệ thống Kinh doanh Thông minh (BI)  
 **Nhóm thực hiện**: Group 8  
 **Thời gian hoàn thành**: 28/10/2026  
+**Hạn nộp**: 08/11/2026 lúc 06:28  
 
 ---
 
-## I. MỤC TIÊU DỰ ÁN
+## I. MỤC TIÊU VÀ PHẠM VI DỰ ÁN
 
-SmartHire Mini được thiết kế nhằm giải quyết bài toán cốt lõi trong tuyển dụng nhân sự hiện đại thông qua sự kết hợp của hai thành phần:
-1. **AI/ML CV Matching**: Tự động hóa quy trình sàng lọc hồ sơ, định lượng mức độ phù hợp giữa nội dung CV của ứng viên và Job Description (JD) dựa trên mô hình học máy và từ điển kỹ năng chuẩn hóa, khắc phục tính cảm tính của việc đọc CV thủ công.
-2. **Business Intelligence (BI)**: Cung cấp góc nhìn phân tích tổng quan cho ban tuyển dụng và nhà quản trị thông qua 3 nhóm trực quan hóa dữ liệu chiến lược: phân bố nguồn lực kỹ năng, xu hướng tiền lương theo thời gian và phễu chuyển đổi tuyển dụng.
+SmartHire Mini được xây dựng nhằm giải quyết bài toán tuyển dụng nhân sự thông minh thông qua sự kết hợp của hai trụ cột công nghệ:
+1. **AI/ML CV Matching**: Tự động hóa quy trình sàng lọc hồ sơ, lượng hóa mức độ phù hợp giữa nội dung CV của ứng viên và Job Description (JD) dựa trên mô hình học máy và từ điển kỹ năng chuẩn hóa, khắc phục tính cảm tính của việc đọc CV thủ công.
+2. **Business Intelligence (BI)**: Cung cấp góc nhìn phân tích đa chiều cho ban tuyển dụng và nhà quản lý nhân sự qua các biểu đồ phân tích dữ liệu trực quan: tương quan cung - cầu kỹ năng, xu hướng tiền lương theo thời gian, tỷ lệ chuyển đổi phễu tuyển dụng, phân bố việc làm theo nhóm chuyên môn và hệ thống nhận xét BI tự động bằng quy tắc.
 
 Dự án tuân thủ nghiêm ngặt nguyên tắc **chạy thật, nhỏ gọn, không giả lập giao diện, có số liệu thực nghiệm và dễ bàn giao**.
 
@@ -19,11 +20,11 @@ Dự án tuân thủ nghiêm ngặt nguyên tắc **chạy thật, nhỏ gọn, 
 
 ## II. BỘ DỮ LIỆU MẪU (DATA SPECIFICATIONS)
 
-Cơ sở dữ liệu sử dụng **SQLite** (`smarthire.db`) với lược đồ quan hệ 7 bảng chuẩn hóa, được nạp qua script `backend/run_seed.py` với cơ chế cố định seed ngẫu nhiên (`seed=42`) để đảm bảo tái lập kết quả giống nhau 100% trên mọi máy trạm:
-- **5 Nhà tuyển dụng (Employers)**: Đại diện cho các lĩnh vực phần mềm, ngân hàng/FinTech, AI & Big Data, thương mại điện tử và an ninh mạng.
+Cơ sở dữ liệu sử dụng **SQLite** (`smarthire.db`) với lược đồ quan hệ 7 bảng chuẩn hóa, được nạp qua script `backend/app/seed_data.py` với cơ chế cố định seed ngẫu nhiên (`seed=42`) để đảm bảo tính nhất quán và khả năng tái lập kiểm thử trên mọi môi trường:
+- **5 Nhà tuyển dụng (Employers)**: Đại diện cho các tập đoàn công nghệ lớn: VNG Corporation, FPT Software, Viettel Solutions, Tiki, MoMo.
 - **20 Ứng viên (Candidates)**: Chứa thông tin hồ sơ và văn bản CV chi tiết bao quát các vị trí Backend (Python, Java, .NET, Node.js), Frontend (React, Vue.js), Data/BI, DevOps/Cloud, AI/ML và các hồ sơ trái ngành/phi kỹ thuật để kiểm thử.
 - **15 Tin tuyển dụng (Jobs)**: Có mức lương mô phỏng từ tháng 05/2026 đến tháng 10/2026 (đơn vị: triệu VNĐ/tháng), yêu cầu số năm kinh nghiệm và danh sách kỹ năng bắt buộc.
-- **25 Kỹ năng chuẩn hóa (Skills)**: Được phân loại theo Backend, Frontend, Database, Data/AI và DevOps.
+- **28 Kỹ năng chuẩn hóa (Skills)**: Được phân loại theo 5 danh mục: Backend, Frontend, Database, Data/AI và DevOps.
 - **40 Đơn ứng tuyển (Applications)**: Được tạo theo chu trình phễu tuyển dụng nhất quán với các giai đoạn:
   + `offered` (Nhận việc): 6 đơn (~15.0%)
   + `interview` (Phỏng vấn): 10 đơn
@@ -43,7 +44,7 @@ Hệ thống sử dụng kết hợp giữa mô hình học máy truyền thốn
    - Chuẩn hóa ký tự công nghệ nhạy cảm (`C#`, `C++`, `.NET`, `CI/CD`, `Node.js`).
    - Loại bỏ khoảng trắng thừa.
 2. **Trích xuất kỹ năng (Skill Taxonomy Extractor)**:
-   - Sử dụng biểu thức chính quy (Regex Word Boundary) dựa trên từ điển 25 kỹ năng và hơn 80 định danh biến thể (aliases).
+   - Sử dụng biểu thức chính quy (Regex Word Boundary) dựa trên từ điển 28 kỹ năng và hơn 80 định danh biến thể (aliases).
 3. **Mô hình hóa ngữ nghĩa TF-IDF & Cosine Similarity**:
    - Sử dụng `TfidfVectorizer` (scikit-learn) với thiết lập `ngram_range=(1, 2)`.
    - **Điểm then chốt**: Vectorizer được `fit()` sẵn trên một **tập văn bản tham chiếu chuẩn (Reference Corpus)** gồm các mô tả công việc IT chuẩn mực. Khi ứng viên nhập CV mới, vectorizer chỉ thực hiện `transform()`. Điều này đảm bảo trọng số IDF cố định, phản ánh đúng tầm quan trọng của các thuật ngữ chuyên môn và ngăn ngừa hiện tượng tính toán sai lệch khi chỉ fit trên 1 cặp CV-JD đơn lẻ.
@@ -53,13 +54,51 @@ Hệ thống sử dụng kết hợp giữa mô hình học máy truyền thốn
    $$\text{Skill Ratio} = \frac{|\text{Matched Skills}|}{|\text{Required Skills}|} \in [0, 1]$$
 5. **Tổng hợp Matching Score (0 - 100%)**:
    $$\text{Matching Score} = \left(0.6 \times \text{Cosine Sim} + 0.4 \times \text{Skill Ratio}\right) \times 100$$
-   *Lý giải thiết kế ban đầu*: Trọng số 60% ngữ nghĩa giúp đánh giá toàn diện năng lực tổng quan và kinh nghiệm thể hiện trong lời văn CV, trong khi 40% kỹ năng đảm bảo ứng viên bắt buộc phải nắm vững các công nghệ lõi của tin tuyển dụng.
+   *Lý giải thiết kế ban đầu*: Trọng số 60% văn bản (TF-IDF + Cosine Similarity) giúp đánh giá toàn diện năng lực tổng quan và kinh nghiệm thể hiện trong lời văn CV, trong khi 40% kỹ năng đảm bảo ứng viên bắt buộc phải nắm vững các công nghệ lõi của tin tuyển dụng.
+6. **Đo thời gian suy luận (Inference Time)**:
+   Hệ thống dùng `time.perf_counter()` đo lường thời gian xử lý thực tế của thuật toán, đạt trung bình **2ms – 15ms**, vượt xa mục tiêu thiết kế ban đầu (< 500ms).
 
 ---
 
-## IV. PHƯƠNG PHÁP KIỂM THỬ VÀ KẾT QUẢ ĐÁNH GIÁ
+## IV. PHÂN TÍCH THÔNG MINH KINH DOANH (BUSINESS INTELLIGENCE - BI)
 
-### 4.1. Bộ kiểm thử tự động (Automated Pytest Suite)
+### 4.1. Nhóm 1: Tương quan Cung & Cầu Kỹ năng (Supply vs Demand)
+- **Phương pháp**: Tổng hợp từ bảng quan hệ nhiều - nhiều `candidate_skills` (Cung) và `job_skills` (Cầu).
+- **Bộ lọc tương tác**: Cho phép người dùng lọc theo từng nhóm chuyên môn: Tất cả, Backend, Frontend, Database, Data/AI, DevOps.
+- **Ghi chú học thuật về quan hệ N-N**: Do một ứng viên hoặc một việc làm có thể sở hữu/yêu cầu nhiều kỹ năng đồng thời, tổng số lượng phân bố kỹ năng không bằng tổng số ứng viên và tổng tỷ lệ phần trăm không nhất thiết là 100%.
+
+### 4.2. Nhóm 2: Xu hướng Mức lương theo Thời gian (Salary Trends)
+- **Giải thích công thức toán học**:
+  - **Lương trung bình thị trường (Mean - 31.2 triệu VNĐ)**: Là trung bình cộng số học của điểm giữa khoảng lương $\frac{\text{salary\_min} + \text{salary\_max}}{2}$ tính trên toàn bộ 15 tin tuyển dụng.
+  - **Lương trung vị (Median - 28.0 triệu VNĐ)**: Là giá trị nằm ở vị trí chính giữa của dãy số trung điểm lương đã sắp xếp, phản ánh mức lương đại diện không bị méo bởi các mức lương đặc biệt cao.
+- **Xu hướng theo tháng**: Được trích xuất từ trường `posted_date` của 15 tin tuyển dụng mô phỏng từ tháng 05/2026 đến tháng 10/2026 phục vụ mục đích minh họa bài thực hành.
+
+### 4.3. Nhóm 3: Tỷ lệ Chuyển đổi Phễu Tuyển dụng (Recruitment Funnel)
+- **Mô hình phễu nhất quán**: Gồm 4 giai đoạn lũy tiến:
+  $$\text{Nộp hồ sơ (40 đơn, 100\%)} \longrightarrow \text{Duyệt hồ sơ (30 đơn, 75\%)} \longrightarrow \text{Phỏng vấn (16 đơn, 40\%)} \longrightarrow \text{Nhận việc (6 đơn, 15\%)}$$
+- **Tỷ lệ chuyển đổi từng bước (Step Conversion Rate)**:
+  - Duyệt hồ sơ / Nộp hồ sơ: $\frac{30}{40} = 75.0\%$
+  - Phỏng vấn / Duyệt hồ sơ: $\frac{16}{30} = 53.3\%$
+  - Nhận việc / Phỏng vấn: $\frac{6}{16} = 37.5\%$
+
+### 4.4. Phân bố Việc làm & Mức lương theo Chuyên môn (Domain Breakdown)
+Hệ thống tổng hợp và phân loại 15 việc làm thành 4 nhóm chuyên môn chính:
+- **Backend**: Chiếm tỷ trọng cao nhất (6 việc làm, Lương trung bình 31.7 triệu VNĐ/tháng).
+- **Data/AI**: Mức đãi ngộ dẫn đầu (3 việc làm, Lương trung bình 36.7 triệu VNĐ/tháng).
+- **DevOps/Cloud**: Nhu cầu ổn định (3 việc làm, Lương trung bình 31.7 triệu VNĐ/tháng).
+- **Frontend**: Nhu cầu thiết yếu (3 việc làm, Lương trung bình 24.3 triệu VNĐ/tháng).
+
+### 4.5. Hệ thống Nhận xét BI Tự động (Automated Rule-Based Insights)
+Hệ thống sử dụng các quy tắc phân tích trực tiếp trên dữ liệu thật để sinh 3 nhận xét chiến lược:
+1. **Mất cân đối Cung - Cầu**: Tự động nhận diện công nghệ có chênh lệch cầu > cung lớn nhất để cảnh báo thiếu hụt nguồn cung.
+2. **So sánh Lương Mean vs Median**: Phân tích sự lệch phân bố giữa mức lương trung bình số học và mức lương trung vị.
+3. **Hiệu suất phễu tuyển dụng**: Đánh giá tỷ lệ ứng viên trúng tuyển thực tế so với tổng số hồ sơ tiếp nhận ban đầu.
+
+---
+
+## V. KIỂM THỬ VÀ ĐÁNH GIÁ MÔ HÌNH (TESTING & EVALUATION)
+
+### 5.1. Bộ kiểm thử tự động (Automated Pytest Suite)
 Hệ thống triển khai 12 ca kiểm thử tự động trong `backend/tests/test_system.py`:
 - **Test 1 - 3**: Kiểm thử tính vẹn toàn của Cơ sở dữ liệu SQLite và các endpoint REST API.
 - **Test 4 - 5**: Kiểm thử tính phân loại của thuật toán Matching với trường hợp hồ sơ rất phù hợp (Score $\ge 65$) và hồ sơ trái ngành (Score $\le 30$).
@@ -68,9 +107,9 @@ Hệ thống triển khai 12 ca kiểm thử tự động trong `backend/tests/t
 - **Test 10 - 11**: Kiểm thử tính logic và thứ tự giảm dần của phễu tuyển dụng ($\text{Applied} \ge \text{Screening} \ge \text{Interview} \ge \text{Offered}$).
 - **Test 12**: Kiểm thử tính toán các chỉ số đánh giá thực nghiệm.
 
-**Kết quả chạy thực tế**: **12/12 bài kiểm thử ĐẠT (PASSED 100%)** trong thời gian 2.55 giây.
+**Kết quả chạy thực tế**: **12/12 bài kiểm thử ĐẠT (PASSED 100%)** trong thời gian 1.70 giây.
 
-### 4.2. Kết quả đánh giá thực tế trên 12 Cặp Gán Nhãn Ground Truth
+### 5.2. Kết quả đánh giá thực tế trên 12 Cặp Gán Nhãn Ground Truth
 
 Mô hình được đánh giá thực nghiệm trực tiếp thông qua API `/api/v1/testing/evaluation` trên 12 cặp CV/JD chuẩn hóa (7 cặp phù hợp, 5 cặp không phù hợp/trái ngành):
 
@@ -112,16 +151,15 @@ Mô hình được đánh giá thực nghiệm trực tiếp thông qua API `/ap
 
 ---
 
-## V. HẠN CHẾ VÀ HƯỚNG CẢI THIỆN
+## VI. HẠN CHẾ VÀ HƯỚNG CẢI THIỆN
 
-### 5.1. Hạn chế hiện tại
-1. **Tập dữ liệu đánh giá quy mô nhỏ:** Tập 12 cặp mẫu có độ phân tách cao, chưa phản ánh đầy đủ các trường hợp biên phức tạp trong tuyển dụng thực tế (ví dụ: ứng viên có 70% kỹ năng cần thiết hoặc sử dụng các công nghệ thay thế tương đương).
+### 6.1. Hạn chế hiện tại
+1. **Tập dữ liệu đánh giá quy mô nhỏ:** Tập 12 cặp mẫu có độ phân tách cao, chưa phản ánh đầy đủ các trường hợp biên phức tạp trong tuyển dụng thực tế.
 2. **Mô hình TF-IDF phụ thuộc từ vựng:** TF-IDF dựa trên tần suất từ vựng, chưa hiểu sâu sắc các từ đồng nghĩa ngữ cảnh phức tạp nếu không được đưa vào từ điển kỹ năng.
 3. **Từ điển kỹ năng cần bảo trì liên tục:** Trích xuất kỹ năng bằng Regex từ điển đòi hỏi cập nhật định kỳ khi công nghệ mới xuất hiện.
 4. **Trọng số cố định (60% TF-IDF, 40% Kỹ năng):** Hiện tại là lựa chọn thiết kế ban đầu dựa trên trực giác nghiệp vụ, chưa được tối ưu hóa có giám sát cho từng ngành nghề đặc thù.
 
-### 5.2. Hướng cải thiện tiếp theo
+### 6.2. Hướng cải thiện tiếp theo
 1. **Mở rộng bộ dữ liệu kiểm thử độc lập:** Thu thập bộ dữ liệu lớn hơn (100–500 cặp CV/JD) chia tách thành tập Train/Validation/Test riêng biệt để tránh thiên lệch khi chọn ngưỡng.
 2. **Nâng cấp biểu diễn ngữ nghĩa:** Tích hợp Sentence Embeddings nhẹ (như all-MiniLM-L6-v2) để nắm bắt từ đồng nghĩa và ngữ cảnh mà không cần tài nguyên GPU nặng.
 3. **Học trọng số tự động:** Sử dụng mô hình Logistic Regression hoặc SVM để tự động tối ưu hóa trọng số kết hợp giữa TF-IDF, kỹ năng, số năm kinh nghiệm và mức lương kỳ vọng.
-

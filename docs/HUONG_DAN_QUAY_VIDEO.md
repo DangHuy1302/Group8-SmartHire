@@ -1,7 +1,7 @@
 # KỊCH BẢN VÀ HƯỚNG DẪN QUAY VIDEO DEMO TH3
 ## DỰ ÁN: SMARTHIRE MINI — GROUP 8
 **Thời lượng dự kiến**: 11 – 13 phút (Đạt chuẩn yêu cầu 10 – 15 phút)  
-**Mục tiêu**: Hướng dẫn chi tiết từng phút, từng thao tác chuột, lời thuyết minh và bằng chứng cần đưa lên màn hình để bất kỳ thành viên nào trong nhóm cũng có thể tự tin quay video đạt điểm tối đa.
+**Mục tiêu**: Hướng dẫn chi tiết từng phút, từng thao tác chuột, lời thuyết minh và bằng chứng cần đưa lên màn hình để bất kỳ thành viên nào trong nhóm cũng có thể tự tin quay video đạt điểm tối đa cho cả 5 Checklist.
 
 ---
 
@@ -16,7 +16,7 @@
 2. **Mở trình duyệt Web**:
    - Mở Chrome/Edge, truy cập `http://localhost:3000`.
    - Nhấn `F11` (hoặc để full screen sạch sẽ, ẩn thanh bookmark nếu cần).
-   - Mở thêm 1 tab phụ: `http://127.0.0.1:8000/docs` (Swagger API để phòng khi cần chứng minh backend chạy thật).
+   - Mở thêm 1 tab phụ: `http://127.0.0.1:8000/docs` (Swagger API để minh chứng backend chạy thật).
 3. **Cài đặt phần mềm quay video**:
    - Sử dụng OBS Studio, Bandicam hoặc Windows Game Bar (`Win + G`).
    - Kiểm tra âm thanh micro to, rõ ràng, không bị rè hoặc lẫn tạp âm.
@@ -34,10 +34,16 @@
 #### Thao tác trên màn hình:
 1. Giữ nguyên giao diện Tab 1. Rê chuột chỉ vào Logo **SmartHire Mini** và nhãn **Group 8**.
 2. Cuộn nhẹ xuống phần **Thống kê thực tế trong Cơ sở dữ liệu SQLite**:
-   - Rê chuột qua 5 ô số liệu: 20 Ứng viên, 5 Nhà tuyển dụng, 15 Tin tuyển dụng, 40 Đơn ứng tuyển, 25 Kỹ năng.
+   - Rê chuột qua 5 ô số liệu: 20 Ứng viên, 5 Nhà tuyển dụng, 15 Tin tuyển dụng, 40 Đơn ứng tuyển, 28 Kỹ năng.
    - Bấm nút **"Đồng bộ DB"** để thấy animation xoay nhẹ, chứng minh dữ liệu được lấy từ API thời gian thực.
 3. Cuộn tiếp xuống phần **Sơ đồ kiến trúc 3 tầng (Architecture)**: Rê chuột giải thích Frontend (React), Backend (FastAPI + Scikit-learn), Data Layer (SQLite).
-4. Cuộn xuống phần **Sơ đồ ERD (7 bảng)**: Rê chuột qua các bảng `employers`, `candidates`, `jobs`, `skills`, `candidate_skills`, `job_skills`, `applications` và chỉ rõ các khóa chính (PK) `id`, khóa ngoại (FK) `employer_id`, `candidate_id`, `job_id`.
+4. Cuộn xuống phần **Sơ đồ ERD trực quan (Visual ERD Flow)**: 
+   - Chỉ vào các khối bảng và đường nối quan hệ:
+     + `employers` $\xrightarrow{\text{1-N}}$ `jobs`
+     + `candidates` $\xrightarrow{\text{1-N}}$ `candidate_skills` $\xleftarrow{\text{1-N}}$ `skills` (Quan hệ N-N)
+     + `jobs` $\xrightarrow{\text{1-N}}$ `job_skills` $\xleftarrow{\text{1-N}}$ `skills` (Quan hệ N-N)
+     + `candidates` $\xrightarrow{\text{1-N}}$ `applications` $\xleftarrow{\text{1-N}}$ `jobs`
+   - Chỉ vào bảng chi tiết 7 thực thể với các khóa chính PK và khóa ngoại FK được thiết kế đối chiếu chính xác với SQLAlchemy models.
 
 #### Lời thoại thuyết minh (Đọc tự tin, rõ ràng):
 > *"Kính chào Thầy và các bạn! Hôm nay, đại diện cho **Group 8**, em xin phép trình bày và minh chứng sản phẩm bài thực hành TH3 với đề tài: **SmartHire Mini — Hệ thống tìm việc thông minh tích hợp AI và BI**.*
@@ -47,14 +53,9 @@
 > - *Tầng Backend xử lý bằng FastAPI của Python, tích hợp thư viện Scikit-learn để tính toán và SQLAlchemy kết nối cơ sở dữ liệu.*
 > - *Tầng dữ liệu sử dụng SQLite gọn nhẹ với file `smarthire.db`.*
 >
-> *Như Thầy có thể quan sát trực tiếp trên màn hình, cơ sở dữ liệu đã được nạp bộ dữ liệu mẫu chuẩn hóa với:*
-> - *20 ứng viên chi tiết,*
-> - *5 nhà tuyển dụng,*
-> - *15 tin tuyển dụng với mức lương trải dài từ tháng 5 đến tháng 10 năm 2026,*
-> - *40 đơn ứng tuyển phân bổ trong phễu,*
-> - *và 25 kỹ năng công nghệ chuẩn hóa.*
+> *Như Thầy có thể quan sát trực tiếp trên màn hình, cơ sở dữ liệu đã được nạp bộ dữ liệu mẫu chuẩn hóa với 20 ứng viên chi tiết, 5 nhà tuyển dụng, 15 tin tuyển dụng với mức lương trải dài từ tháng 5 đến tháng 10 năm 2026, 40 đơn ứng tuyển phân bổ trong phễu và 28 kỹ năng công nghệ chuẩn hóa.*
 >
-> *Về mặt thiết kế cơ sở dữ liệu, ERD của hệ thống gồm đúng 7 thực thể liên kết với nhau qua các khóa chính, khóa ngoại chặt chẽ. Đảm bảo toàn vẹn dữ liệu và kết quả seed có thể tái lập 100% trên bất kỳ máy tính nào."*
+> *Về mặt thiết kế cơ sở dữ liệu, ERD của hệ thống gồm đúng 7 thực thể liên kết với nhau qua các khóa chính, khóa ngoại chặt chẽ. Hệ thống thể hiện rõ ràng các mối quan hệ 1-N và N-N giữa ứng viên, việc làm, kỹ năng và đơn ứng tuyển. Toàn bộ cấu trúc này đối chiếu chính xác với SQLAlchemy models và SQLite schema thực tế."*
 
 ---
 
@@ -67,18 +68,18 @@
    - Tại ô chọn JD, chọn Job **#1 — Senior Python Backend Engineer**.
    - Tại ô "Mẫu có sẵn", chọn ứng viên **Nguyễn Văn An (Backend Developer)**.
    - Thấy nội dung CV được tự động điền: *"Kỹ sư Backend 3 năm kinh nghiệm lập trình Python, FastAPI..."*
-   - Rê chuột vào phần **Trọng số thử nghiệm**: Chỉ vào thanh trượt (60% TF-IDF Cosine Similarity và 40% Tỷ lệ kỹ năng).
+   - Rê chuột vào phần **Trọng số thử nghiệm**: Chỉ vào thanh trượt (60% Độ tương đồng văn bản TF-IDF + Cosine Similarity và 40% Tỷ lệ kỹ năng).
    - Nhấn nút **"Phân tích mức độ phù hợp"**.
-   - **Bằng chứng xuất hiện**: Thanh điểm Matching Score hiện ra rất cao (~75% - 85%), màu xanh lá cây; TF-IDF Similarity hiện rõ; Tỷ lệ kỹ năng hiện rõ; Hộp "Kỹ năng phù hợp" hiển thị màu xanh: *Python, FastAPI, PostgreSQL, Docker, Git, RESTful API*; Hộp "Kỹ năng còn thiếu" trống hoặc ít.
+   - **Bằng chứng xuất hiện**: Thanh điểm Matching Score hiện ra rất cao (74.3%), màu xanh lá cây; Độ tương đồng văn bản (TF-IDF + Cosine Similarity) hiện rõ; Tỷ lệ kỹ năng hiện rõ; Thời gian suy luận hiển thị **Inference time: ~2ms – 10ms**; Hộp "Kỹ năng phù hợp" hiển thị màu xanh: *Python, FastAPI, PostgreSQL, Docker, Git, RESTful API*; Hộp "Kỹ năng còn thiếu" trống hoặc ít.
 2. **Ca 2 (Hồ sơ trái ngành — Mismatch)**:
    - Giữ nguyên Job #1 (Python Backend).
    - Tại ô ứng viên mẫu, chọn **Bùi Mai Hương (Senior Accountant)** (Kế toán tổng hợp).
    - Nhấn nút **"Phân tích mức độ phù hợp"**.
-   - **Bằng chứng xuất hiện**: Matching Score tụt xuống thấp (~10% - 20%), thanh điểm màu đỏ; Tỷ lệ kỹ năng 0%; Kỹ năng phù hợp trống; Kỹ năng còn thiếu hiển thị toàn bộ kỹ năng yêu cầu. Nhận xét hệ thống chuyển thành *"Không phù hợp (Mismatch)"*.
+   - **Bằng chứng xuất hiện**: Matching Score tụt xuống thấp (2.1%), thanh điểm màu đỏ; Tỷ lệ kỹ năng 0%; Kỹ năng phù hợp trống; Kỹ năng còn thiếu hiển thị toàn bộ kỹ năng yêu cầu. Nhận xét hệ thống chuyển thành *"Không phù hợp (Mismatch)"*.
 3. **Ca 3 (Kiểm thử trường hợp biên — Empty CV)**:
    - Xóa sạch nội dung CV trong ô textarea.
-   - Nhập một vài chữ không liên quan hoặc để trống, nhấn nút phân tích.
-   - Hệ thống thông báo cảnh báo hoặc trả điểm 0 an toàn mà không bị crash backend.
+   - Nhấn nút phân tích.
+   - Hệ thống thông báo lỗi validation rõ ràng: *"Vui lòng nhập nội dung văn bản CV để thực hiện phân tích"*, bảo đảm tính ổn định và an toàn của hệ thống.
 
 #### Lời thoại thuyết minh:
 > *"Tiếp theo, em xin chuyển sang **Checklist 2: Mô hình AI/ML CV Matching**.*
@@ -87,13 +88,15 @@
 >
 > *Quy trình xử lý gồm 4 bước:*
 > 1. *Chuẩn hóa văn bản và trích xuất kỹ năng bằng bộ từ điển Regex chuẩn hóa.*
-> 2. *Vector hóa văn bản bằng TF-IDF. Điểm đặc biệt trong thiết kế của nhóm là **Vectorizer được fit sẵn trên một tập văn bản tham chiếu chuẩn (Reference Corpus)** của ngành phần mềm. Điều này giúp trọng số IDF cố định và khách quan, tránh việc fit cục bộ trên từng CV làm mất tính nhất quán.*
-> 3. *Đo độ tương đồng ngữ nghĩa bằng Cosine Similarity.*
-> 4. *Kết hợp với tỷ lệ kỹ năng đáp ứng theo công thức trọng số ban đầu: 60% tương đồng ngữ nghĩa TF-IDF và 40% tỷ lệ kỹ năng cốt lõi.*
+> 2. *Vector hóa văn bản bằng TF-IDF. Điểm then chốt trong thiết kế của nhóm là **Vectorizer được fit sẵn trên một tập văn bản tham chiếu chuẩn (Reference Corpus)** của ngành phần mềm. Điều này giúp trọng số IDF cố định và khách quan, tránh việc fit cục bộ trên từng CV làm mất tính nhất quán.*
+> 3. *Đo độ tương đồng văn bản bằng Cosine Similarity.*
+> 4. *Kết hợp với tỷ lệ kỹ năng đáp ứng theo công thức trọng số ban đầu: 60% độ tương đồng văn bản TF-IDF và 40% tỷ lệ kỹ năng cốt lõi.*
 >
-> *Bây giờ em sẽ thực hiện phân tích mẫu: Khi chọn tin tuyển dụng **Python Backend** và chọn ứng viên **Nguyễn Văn An**, nhấn 'Phân tích' — Backend FastAPI tính toán tức thì trong chưa đầy 100 mili-giây, trả về Matching Score 80.4%, chỉ rõ các kỹ năng trùng khớp như Python, FastAPI, PostgreSQL và đưa ra đánh giá Rất phù hợp.*
+> *Bây giờ em sẽ thực hiện phân tích mẫu: Khi chọn tin tuyển dụng **Python Backend** và chọn ứng viên **Nguyễn Văn An**, nhấn 'Phân tích' — Backend FastAPI tính toán tức thì chỉ trong **vài mili-giây**, trả về Matching Score 74.3%, chỉ rõ các kỹ năng trùng khớp như Python, FastAPI, PostgreSQL và đưa ra đánh giá Rất phù hợp.*
 >
-> *Ngược lại, khi chọn hồ sơ kế toán của ứng viên **Bùi Mai Hương** ứng tuyển vào vị trí lập trình, Matching Score lập tức giảm xuống dưới 20%, kỹ năng đáp ứng là 0% và hệ thống cảnh báo Mismatch rõ ràng."*
+> *Ngược lại, khi chọn hồ sơ kế toán của ứng viên **Bùi Mai Hương** ứng tuyển vào vị trí lập trình, Matching Score lập tức giảm xuống chỉ còn 2.1%, kỹ năng đáp ứng là 0% và hệ thống cảnh báo Mismatch rõ ràng.*
+>
+> *Khi để trống CV, hệ thống kiểm tra validation và cảnh báo lỗi thân thiện mà không bị văng hệ thống."*
 
 ---
 
@@ -102,27 +105,39 @@
 🖥 **Màn hình mở**: Bấm chuyển sang **Tab 3: 3. Dashboard BI**
 
 #### Thao tác trên màn hình:
-1. Rê chuột qua 5 thẻ KPI trên cùng (20 ứng viên, 15 tin tuyển dụng, 5 nhà tuyển dụng, 40 đơn ứng tuyển, mức lương trung vị 32.5 tr/tháng).
-2. Cuộn đến **Nhóm 1 — Số lượng ứng viên theo kỹ năng**:
-   - Rê chuột vào các cột bar chart: Python, Git, Docker, React, SQL... Tooltip hiện rõ số lượng ứng viên tương ứng.
-3. Cuộn đến **Nhóm 2 — Xu hướng mức lương theo thời gian**:
+1. Rê chuột qua 5 thẻ KPI trên cùng (20 ứng viên, 15 tin tuyển dụng, 5 nhà tuyển dụng, 40 đơn ứng tuyển).
+   - Chỉ vào ô thứ 5: **Lương thị trường (Mid): 31.2 tr/tháng** và **Lương trung vị: 28.0 tr/tháng**.
+2. Rê chuột vào phần **Nhận xét BI tự động (Automated Rule-Based Insights)**:
+   - Đọc 3 nhận xét do backend tự động sinh từ dữ liệu thật (Cảnh báo lệch cung-cầu kỹ năng, So sánh Mean vs Median, Đánh giá hiệu suất phễu).
+3. Cuộn đến **Nhóm 1 — Tương quan Cung & Cầu kỹ năng**:
+   - Thao tác click vào các nút lọc: **Backend**, **Frontend**, **Data/AI**, **DevOps**, rồi quay lại **Tất cả**. Biểu đồ cập nhật mượt mà theo từng danh mục.
+   - Rê chuột vào cột xanh (Cung - Ứng viên) và cột vàng (Cầu - Việc làm) để thấy tooltip so sánh.
+   - Chỉ vào ghi chú quan hệ N-N (một ứng viên có nhiều kỹ năng nên tổng tỷ lệ không nhất thiết là 100%).
+4. Cuộn đến **Phân bố việc làm & Mức lương theo Chuyên môn (Domain Breakdown)**:
+   - Chỉ vào ComposedChart kết hợp cột (Số lượng tin tuyển dụng) và đường (Mức lương trung bình Mid).
+   - Giải thích: Nhóm Data/AI có mức lương cao nhất (36.7 tr), trong khi Backend chiếm số lượng tuyển nhiều nhất (6 jobs).
+5. Cuộn đến **Nhóm 2 — Xu hướng mức lương theo thời gian**:
    - Rê chuột vào đường AreaChart và 2 đường nét đứt (Lương Min, Lương Mid, Lương Max).
-   - Rê chuột vào hộp chú thích màu xanh: Đọc to phần chú thích *"Mức lương từ 15 tin tuyển dụng mô phỏng giai đoạn 05/2026 - 10/2026, đơn vị triệu VNĐ/tháng"*.
-4. Cuộn đến **Nhóm 3 — Tỷ lệ chuyển đổi qua các giai đoạn tuyển dụng (Recruitment Funnel)**:
-   - Rê chuột qua 4 khối giai đoạn: 1. Nộp hồ sơ (100%), 2. Duyệt hồ sơ (75.0%), 3. Phỏng vấn (40.0%), 4. Nhận việc (15.0%).
+   - Rê chuột vào hộp chú thích toán học: Giải thích rõ Lương trung bình Mean (31.2 tr) tính từ trung điểm các khoảng lương `(min + max) / 2` và Lương trung vị Median (28.0 tr).
+6. Cuộn đến **Nhóm 3 — Tỷ lệ chuyển đổi qua các giai đoạn tuyển dụng (Recruitment Funnel)**:
+   - Rê chuột qua 4 khối giai đoạn: 1. Nộp hồ sơ (40 đơn, 100%), 2. Duyệt hồ sơ (30 đơn, 75.0%), 3. Phỏng vấn (16 đơn, 40.0%), 4. Nhận việc (6 đơn, 15.0%).
    - Chỉ vào biểu đồ thanh ngang Recharts biểu diễn tỷ lệ phần trăm chuyển đổi lũy tiến.
    - Nhấn mạnh nguyên tắc tính toán phễu nhất quán (không lấy trạng thái rời rạc).
 
 #### Lời thoại thuyết minh:
 > *"Em xin chuyển sang **Checklist 3: Dashboard BI (Business Intelligence)**.*
 >
-> *Toàn bộ dữ liệu hiển thị trên Dashboard này đều được tính toán tổng hợp trực tiếp từ cơ sở dữ liệu SQLite thông qua API `/api/v1/bi/dashboard` và hiển thị bằng thư viện biểu đồ **Recharts** hiện đại. Đúng theo yêu cầu đề bài, Dashboard gồm đúng 3 nhóm biểu đồ chuyên sâu:*
+> *Toàn bộ dữ liệu hiển thị trên Dashboard này đều được tính toán tổng hợp trực tiếp từ cơ sở dữ liệu SQLite thông qua API `/api/v1/bi/dashboard` và hiển thị bằng thư viện biểu đồ **Recharts** hiện đại. Hệ thống đáp ứng đầy đủ 3 nhóm biểu đồ bắt buộc và các tính năng nâng cấp chuyên sâu:*
 >
-> *Thứ nhất là **Biểu đồ số lượng ứng viên theo kỹ năng**: Trực quan hóa mức độ dồi dào của nguồn nhân lực công nghệ, giúp nhà tuyển dụng biết được kỹ năng nào đang phổ biến (như Git, Python, Docker) và kỹ năng nào khan hiếm.*
+> *Đầu tiên, hệ thống cung cấp **Hộp nhận xét BI tự động (Automated Insights)** được sinh bằng quy tắc từ dữ liệu thật, giúp phát hiện ngay các bất cân xứng cung cầu và đánh giá tỷ lệ chuyển đổi.*
 >
-> *Thứ hai là **Biểu đồ xu hướng mức lương theo thời gian**: Nhóm xin nêu rõ đây là mức lương được tổng hợp từ 15 tin tuyển dụng mô phỏng trong giai đoạn từ tháng 05/2026 đến tháng 10/2026, đơn vị tính là triệu VNĐ/tháng. Biểu đồ thể hiện mức lương sàn, mức lương trần và mức lương trung bình thị trường có xu hướng tăng nhẹ theo quý.*
+> *Thứ nhất là **Biểu đồ tương quan Cung - Cầu kỹ năng**: Cho phép so sánh trực quan giữa số lượng ứng viên sở hữu kỹ năng và số lượng việc làm yêu cầu. Người dùng có thể tương tác lọc nhanh theo các chuyên ngành như Backend, Frontend, Data/AI, DevOps.*
 >
-> *Thứ ba là **Biểu đồ tỷ lệ chuyển đổi qua các giai đoạn tuyển dụng (Phễu tuyển dụng)**: Nhóm áp dụng logic phễu nhất quán: từ 40 đơn nộp ban đầu (100%), có 30 ứng viên vượt qua vòng duyệt hồ sơ (đạt tỷ lệ 75%), 16 ứng viên tiến tới vòng phỏng vấn (40%) và cuối cùng có 6 ứng viên chính thức nhận việc thành công (15%). Nhóm không lấy các trạng thái hiện tại rời rạc để suy diễn sai lệch, mà tính toán theo tiến trình lũy tiến thực sự của phễu nhân sự."*
+> *Thứ hai là **Biểu đồ phân bố việc làm và mức lương theo chuyên môn**: Giúp nhà quản trị thấy rõ nhóm Data/AI có mức lương dẫn đầu thị trường với 36.7 triệu đồng, trong khi Backend chiếm tỷ trọng tuyển dụng lớn nhất.*
+>
+> *Thứ ba là **Biểu đồ xu hướng mức lương theo thời gian**: Nhóm xin giải thích rõ ràng về mặt toán học: Mức lương trung bình thị trường 31.2 triệu được tính từ trung điểm khoảng lương `(min + max)/2` của 15 tin tuyển dụng mô phỏng giai đoạn 05/2026 - 10/2026. Mức lương trung vị là 28.0 triệu, phản ánh mức đãi ngộ thực tế không bị ảnh hưởng bởi các vị trí cao cấp.*
+>
+> *Thứ tư là **Biểu đồ tỷ lệ chuyển đổi phễu tuyển dụng**: Nhóm áp dụng logic phễu nhất quán: từ 40 đơn nộp ban đầu (100%), có 30 ứng viên vượt qua vòng duyệt hồ sơ (75%), 16 ứng viên tiến tới vòng phỏng vấn (40%) và cuối cùng có 6 ứng viên chính thức nhận việc thành công (15%)."*
 
 ---
 
@@ -174,7 +189,7 @@
 > *"Và phần cuối cùng là **Bàn giao sản phẩm**. Toàn bộ mã nguồn dự án đã được đóng gói hoàn chỉnh, chuẩn bị sẵn sàng đẩy lên GitHub bao gồm:*
 > - *File `setup.bat` tự động cài đặt môi trường chỉ với 1 click.*
 > - *File `start.bat` khởi động song song Backend và Frontend.*
-> - *Bộ tài liệu báo cáo `BAO_CAO_THUC_HANH.md` và sơ đồ kiến trúc `ARCHITECTURE_AND_ERD.md`.*
+> - *Bộ tài liệu báo cáo `BAO_CAO_THUC_HANH.md`, sơ đồ kiến trúc `ARCHITECTURE_AND_ERD.md` và hướng dẫn kịch bản quay video.*
 > - *Dự án hoàn toàn chạy offline trên máy trạm Windows, không lưu trữ khóa API hay dữ liệu cá nhân nhạy cảm.*
 >
 > *Trên đây là toàn bộ phần trình bày minh chứng hoàn thành đầy đủ 5 checklist của **Group 8** cho đề tài SmartHire Mini. Nhóm em xin chân thành cảm ơn Thầy đã theo dõi và lắng nghe!"*
@@ -185,4 +200,3 @@
 1. **Nói chậm rãi, tự tin**: Tránh đọc quá nhanh; di chuyển con trỏ chuột đến đúng vị trí biểu đồ hoặc số liệu đang nói để người xem dễ quan sát.
 2. **Không bỏ qua bằng chứng**: Khi nói đến F1-Score 100% (trên 12 mẫu) hay 12 test cases, bắt buộc phải để màn hình hiển thị bảng số liệu hoặc bấm nút chạy test để có bằng chứng chạy thật.
 3. **Thời gian chuẩn**: Căn đồng hồ sao cho video kết thúc trong khoảng từ 11 đến 13 phút.
-

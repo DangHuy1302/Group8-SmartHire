@@ -102,3 +102,4 @@ class Application(Base):
 
     candidate = relationship("Candidate", back_populates="applications")
     job = relationship("Job", back_populates="applications")
+

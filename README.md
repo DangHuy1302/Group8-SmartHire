@@ -1,16 +1,16 @@
 # SmartHire Mini — Hệ thống tìm việc thông minh tích hợp AI và BI
 
 **Tên nhóm**: Group 8  
-**Đề tài**: Bài thực hành TH3 — Hệ thống Kinh doanh Thông minh  
+**Đề tài**: Bài thực hành TH3 — Hệ thống Kinh doanh Thông minh (BI)  
 **Hạn nộp**: 08/11/2026 lúc 06:28  
 
 ---
 
 ## 📌 GIỚI THIỆU DỰ ÁN
 
-**SmartHire Mini** là hệ thống phần mềm hoàn chỉnh, gọn nhẹ kết hợp giữa trí tuệ nhân tạo (Machine Learning) và kinh doanh thông minh (BI) để giải quyết bài toán tuyển dụng:
-1. **AI/ML CV Matching**: Trích xuất kỹ năng bằng bộ từ điển Regex chuẩn hóa, vector hóa văn bản bằng TF-IDF dựa trên tập tham chiếu nền, đo độ tương đồng Cosine Similarity (60%) và tỷ lệ kỹ năng đáp ứng (40%) để tính Matching Score khách quan.
-2. **Dashboard BI**: Trực quan hóa dữ liệu tuyển dụng qua 3 nhóm biểu đồ chuyên sâu: phân bố nhân lực theo kỹ năng, xu hướng tiền lương theo thời gian và phễu chuyển đổi tuyển dụng nhất quán.
+**SmartHire Mini** là hệ thống phần mềm hoàn chỉnh, nhỏ gọn kết hợp giữa trí tuệ nhân tạo (Machine Learning) và kinh doanh thông minh (BI) để giải quyết bài toán tuyển dụng:
+1. **AI/ML CV Matching**: Trích xuất kỹ năng bằng bộ từ điển Regex chuẩn hóa (28 kỹ năng), vector hóa văn bản bằng TF-IDF dựa trên tập tham chiếu nền (Reference Corpus), đo độ tương đồng văn bản Cosine Similarity (60%) và tỷ lệ kỹ năng đáp ứng (40%) để tính Matching Score khách quan.
+2. **Dashboard BI**: Trực quan hóa dữ liệu tuyển dụng qua 3 nhóm biểu đồ chuyên sâu: tương quan cung - cầu kỹ năng (có bộ lọc danh mục), xu hướng tiền lương theo thời gian (giải thích rõ Mean vs Median), phễu chuyển đổi tuyển dụng nhất quán, biểu đồ phân bố việc làm & lương theo chuyên môn và hệ thống nhận xét BI tự động sinh bằng quy tắc (Rule-based Insights).
 3. **Kiểm thử & Đánh giá**: Tích hợp 12 bài kiểm thử tự động `pytest` và đánh giá các chỉ số Accuracy, Precision, Recall, F1 trên tập 12 cặp CV/JD gán nhãn thực nghiệm.
 
 ---
@@ -21,7 +21,7 @@
 - **Machine Learning**: Scikit-learn (`TfidfVectorizer`, `cosine_similarity`), NumPy.
 - **Database**: SQLite (`backend/smarthire.db`) — lưu trữ cục bộ, không cần cài server RDBMS.
 - **Frontend**: React 18, TypeScript, Vite, Tailwind CSS v4, Lucide-react.
-- **Trực quan hóa**: Recharts.
+- **Trực quan hóa**: Recharts (BarChart, AreaChart, ComposedChart).
 - **Kiểm thử**: Pytest, HTTPX.
 
 ---
@@ -37,8 +37,8 @@ Group8-SmartHire/
 │   │   ├── models.py           # 7 thực thể SQLAlchemy (ERD)
 │   │   ├── schemas.py          # Pydantic Schemas request/response
 │   │   ├── ml_service.py       # Engine TF-IDF + Cosine Sim + Skill Extractor
-│   │   ├── bi_service.py       # Tính toán BI: Skills, Salaries, Funnel
-│   │   ├── seed_data.py        # Seed 20 ứng viên, 5 NTD, 15 jobs, 40 apps
+│   │   ├── bi_service.py       # Tính toán BI: Skills, Salaries, Funnel, Domains, Insights
+│   │   ├── seed_data.py        # Seed 20 ứng viên, 5 NTD, 15 jobs, 40 apps, 28 skills
 │   │   ├── ground_truth.py     # 12 cặp CV/JD có nhãn Ground Truth
 │   │   └── main.py             # FastAPI REST endpoints
 │   ├── tests/
@@ -50,9 +50,9 @@ Group8-SmartHire/
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── Navbar.tsx      # Thanh điều hướng 4 màn hình
-│   │   │   ├── OverviewTab.tsx # Màn hình 1: Tổng quan, ERD & DB Stats
+│   │   │   ├── OverviewTab.tsx # Màn hình 1: Tổng quan, ERD trực quan & DB Stats
 │   │   │   ├── MatchingTab.tsx # Màn hình 2: AI CV Matching
-│   │   │   ├── DashboardTab.tsx# Màn hình 3: Dashboard BI (3 nhóm biểu đồ)
+│   │   │   ├── DashboardTab.tsx# Màn hình 3: Dashboard BI (3 nhóm biểu đồ + Domain Stats + Insights)
 │   │   │   └── TestingTab.tsx  # Màn hình 4: Test cases & F1 Evaluation
 │   │   ├── services/
 │   │   │   └── api.ts          # Axios API client
@@ -65,12 +65,12 @@ Group8-SmartHire/
 │   ├── vite.config.ts
 │   └── tsconfig.json
 ├── docs/
-│   ├── ARCHITECTURE_AND_ERD.md # Sơ đồ kiến trúc & ERD
+│   ├── ARCHITECTURE_AND_ERD.md # Sơ đồ kiến trúc & ERD chi tiết
 │   ├── BAO_CAO_THUC_HANH.md    # Báo cáo kết quả đánh giá thực tế
 │   └── HUONG_DAN_QUAY_VIDEO.md # Kịch bản 12 phút chi tiết từng phút
 ├── requirements.txt
-├── setup.bat                   # Cài đặt tự động 1 click trên Windows
-├── start.bat                   # Khởi chạy toàn bộ hệ thống
+├── setup.bat                   # Cài đặt tự động 1 click trên Windows (100% ASCII)
+├── start.bat                   # Khởi chạy toàn bộ hệ thống (100% ASCII)
 └── README.md
 ```
 
@@ -98,9 +98,8 @@ pip install -r requirements.txt
 # Nạp dữ liệu mẫu vào SQLite
 python backend\run_seed.py
 
-# Khởi chạy server FastAPI
-cd backend
-uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+# Khởi chạy server FastAPI từ thư mục gốc
+python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
 #### 2. Khởi động Frontend
@@ -145,4 +144,3 @@ Xem chi tiết từng phút, câu thoại thuyết minh và thao tác tại:
 ## 👥 THÀNH VIÊN GROUP 8
 - Toàn bộ thành viên Group 8 tham gia thiết kế, lập trình backend, frontend, mô hình ML, kiểm thử và quay video demo.
 - Dự án sẵn sàng bàn giao qua GitHub, không chứa mã bí mật hoặc API keys nhạy cảm.
-

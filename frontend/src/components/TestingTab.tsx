@@ -220,7 +220,7 @@ export const TestingTab: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200">
-                    {evaluation.pairs.map((p) => (
+                    {(evaluation.pairs || []).map((p) => (
                       <tr key={p.pair_id} className={p.is_correct ? 'bg-white' : 'bg-rose-50/40'}>
                         <td className="p-2.5 font-bold text-slate-500">#{p.pair_id}</td>
                         <td className="p-2.5 font-medium text-slate-800">{p.candidate_name}</td>

@@ -1,19 +1,21 @@
-from typing import List, Dict
+from typing import List, Dict, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from datetime import datetime
 
-from .models import Candidate, Job, Employer, Application, Skill, CandidateSkill
+from .models import Candidate, Job, Employer, Application, Skill, CandidateSkill, JobSkill
 from .schemas import (
-    BIDashboardData, SkillStatItem, SalaryTrendItem, FunnelStageItem
+    BIDashboardData, SkillStatItem, SalaryTrendItem, FunnelStageItem, DomainStatItem
 )
 
-def get_bi_dashboard_data(db: Session) -> BIDashboardData:
+def get_bi_dashboard_data(db: Session, category_filter: Optional[str] = None) -> BIDashboardData:
     """
     Tính toán các chỉ số Business Intelligence trực tiếp từ SQLite Database:
-    1. Phân bố ứng viên theo kỹ năng.
+    1. Phân bố ứng viên theo kỹ năng (có thể lọc theo nhóm danh mục).
     2. Xu hướng mức lương trung bình theo thời gian (từ tin tuyển dụng mô phỏng).
     3. Tỷ lệ chuyển đổi qua phễu tuyển dụng thực tế (dựa trên chu trình phễu nhất quán).
+    4. Phân bố việc làm và lương theo nhóm chuyên môn (Domain Stats).
+    5. Các nhận xét BI được sinh tự động bằng quy tắc từ số liệu thật (Rule-based Insights).
     """
     # 1. KPIs tổng quan
     total_candidates = db.query(Candidate).count()
@@ -21,24 +23,43 @@ def get_bi_dashboard_data(db: Session) -> BIDashboardData:
     total_employers = db.query(Employer).count()
     total_applications = db.query(Application).count()
 
-    # Tính lương trung vị / trung bình của thị trường từ các JD
-    avg_mid_salary = db.query(
-        func.avg((Job.salary_min + Job.salary_max) / 2.0)
-    ).scalar() or 0.0
+    jobs = db.query(Job).order_by(Job.posted_date.asc()).all()
 
-    # 2. Nhóm 1: Số lượng ứng viên theo kỹ năng
-    skill_stats_query = (
+    # Tính trung điểm khoảng lương từng job: mid = (min + max) / 2
+    all_job_mids = sorted([(j.salary_min + j.salary_max) / 2.0 for j in jobs])
+    
+    # Lương trung bình thị trường (Arithmetic Mean của các trung điểm):
+    avg_mid_salary = sum(all_job_mids) / len(all_job_mids) if all_job_mids else 0.0
+    
+    # Lương trung vị thị trường (Median của các trung điểm):
+    if len(all_job_mids) == 0:
+        median_salary = 0.0
+    elif len(all_job_mids) % 2 == 1:
+        median_salary = all_job_mids[len(all_job_mids) // 2]
+    else:
+        median_salary = (all_job_mids[len(all_job_mids) // 2 - 1] + all_job_mids[len(all_job_mids) // 2]) / 2.0
+
+    # 2. Nhóm 1: Số lượng ứng viên theo kỹ năng (có hỗ trợ lọc theo danh mục)
+    skill_query = (
         db.query(
             Skill.name.label("skill_name"),
             Skill.category.label("category"),
             func.count(CandidateSkill.candidate_id).label("candidate_count")
         )
         .join(CandidateSkill, Skill.id == CandidateSkill.skill_id)
+    )
+    
+    if category_filter and category_filter != "All":
+        skill_query = skill_query.filter(Skill.category == category_filter)
+        
+    skill_stats_query = (
+        skill_query
         .group_by(Skill.id, Skill.name, Skill.category)
         .order_by(func.count(CandidateSkill.candidate_id).desc())
         .limit(10)
         .all()
     )
+    
     skill_distribution = [
         SkillStatItem(
             skill_name=row.skill_name,
@@ -48,11 +69,8 @@ def get_bi_dashboard_data(db: Session) -> BIDashboardData:
         for row in skill_stats_query
     ]
 
-    # 3. Nhóm 2: Xu hướng mức lương theo thời gian (dữ liệu mô phỏng trong các tháng)
-    # Gom nhóm theo tháng đăng tin (strftime '%Y-%m')
-    jobs = db.query(Job).order_by(Job.posted_date.asc()).all()
+    # 3. Nhóm 2: Xu hướng mức lương theo thời gian (dữ liệu mô phỏng theo tháng 05/2026 - 10/2026)
     monthly_data: Dict[str, Dict] = {}
-    
     for job in jobs:
         period = job.posted_date.strftime("%Y-%m")
         if period not in monthly_data:
@@ -82,18 +100,10 @@ def get_bi_dashboard_data(db: Session) -> BIDashboardData:
         )
 
     # 4. Nhóm 3: Tỷ lệ chuyển đổi qua các giai đoạn tuyển dụng (Recruitment Funnel)
-    # Logic phễu nhất quán:
-    # Mọi đơn nộp đều bắt đầu từ 'applied'.
-    # Các đơn đã vào 'screening', 'interview', 'offered' đều đã vượt qua các giai đoạn trước đó.
-    # Ứng viên 'rejected' được ghi nhận đã dừng lại tại vòng nộp hoặc vòng duyệt.
     all_apps = db.query(Application).all()
-    
     total_applied = len(all_apps)
-    # Đã qua vòng duyệt hồ sơ (gồm các trạng thái: screening, interview, offered)
     passed_screening = sum(1 for a in all_apps if a.stage in ["screening", "interview", "offered"])
-    # Đã vào vòng phỏng vấn (gồm: interview, offered)
     reached_interview = sum(1 for a in all_apps if a.stage in ["interview", "offered"])
-    # Đã nhận lời mời nhận việc (offered)
     accepted_offer = sum(1 for a in all_apps if a.stage == "offered")
 
     funnel_stages: List[FunnelStageItem] = [
@@ -127,9 +137,68 @@ def get_bi_dashboard_data(db: Session) -> BIDashboardData:
         )
     ]
 
+    # 5. Biểu đồ bổ sung: Phân bố việc làm & mức lương trung bình theo nhóm chuyên môn (Domain)
+    domain_rules = {
+        "Backend": ["Backend", "Java", ".NET", "Node.js", "Python"],
+        "Frontend": ["Frontend", "React", "Vue"],
+        "Data / AI": ["Data", "Machine Learning", "AI", "BI"],
+        "DevOps / Cloud": ["DevOps", "Cloud", "SRE", "Security"]
+    }
+    domain_stats: List[DomainStatItem] = []
+    for d_name, keywords in domain_rules.items():
+        d_jobs = [j for j in jobs if any(kw.lower() in j.title.lower() for kw in keywords)]
+        if d_jobs:
+            d_mid = sum((j.salary_min + j.salary_max) / 2.0 for j in d_jobs) / len(d_jobs)
+            d_skills: List[str] = []
+            for j in d_jobs:
+                for js in j.skills:
+                    if js.skill and js.skill.name not in d_skills:
+                        d_skills.append(js.skill.name)
+            domain_stats.append(DomainStatItem(
+                domain_name=d_name,
+                domain=d_name,
+                job_count=len(d_jobs),
+                avg_salary_mid=round(d_mid, 1),
+                top_skills=d_skills[:4]
+            ))
+
+    # 6. Phần nhận xét BI sinh tự động bằng quy tắc từ số liệu thật (Rule-based Insights)
+    bi_insights: List[str] = []
+    
+    # Insight 1: Kỹ năng phổ biến nhất
+    if skill_distribution:
+        top_skill = skill_distribution[0]
+        bi_insights.append(
+            f"Kỹ năng dẫn đầu nguồn cung là '{top_skill.skill_name}' với {top_skill.candidate_count} ứng viên sở hữu "
+            f"({round(top_skill.candidate_count / total_candidates * 100)}% tổng số hồ sơ). "
+            f"Lưu ý: Một ứng viên có thể sở hữu nhiều kỹ năng (quan hệ N–N)."
+        )
+        
+    # Insight 2: Xu hướng tiền lương
+    if len(salary_trends) >= 2:
+        first_t = salary_trends[0]
+        last_t = salary_trends[-1]
+        diff_pct = round(((last_t.avg_salary_mid - first_t.avg_salary_mid) / first_t.avg_salary_mid) * 100, 1)
+        direction = "tăng" if diff_pct >= 0 else "giảm"
+        bi_insights.append(
+            f"Mức lương trung bình (trung điểm min-max) có xu hướng {direction} {abs(diff_pct)}% "
+            f"từ {first_t.avg_salary_mid} tr/tháng ({first_t.period}) đến {last_t.avg_salary_mid} tr/tháng ({last_t.period})."
+        )
+        
+    # Insight 3: Hiệu suất phễu tuyển dụng
+    offered_rate = funnel_stages[3].conversion_rate_from_applied
+    screening_rate = funnel_stages[1].step_conversion_rate
+    interview_to_offer = funnel_stages[3].step_conversion_rate
+    bi_insights.append(
+        f"Hiệu suất chuyển đổi toàn phễu đạt {offered_rate}% (từ {total_applied} đơn ứng tuyển nộp ban đầu chọn ra được {accepted_offer} nhân sự nhận việc). "
+        f"Trong đó, tỷ lệ sàng lọc hồ sơ đạt {screening_rate}% và tỷ lệ ứng viên phỏng vấn được nhận việc đạt {interview_to_offer}%."
+    )
+
     salary_notes = (
-        "Lưu ý: Mức lương phản ánh từ 15 tin tuyển dụng mô phỏng giai đoạn từ 05/2026 đến 10/2026. "
-        "Đơn vị tính: Triệu VNĐ/tháng (Gross). Biểu đồ phản ánh mức lương tối thiểu, tối đa và trung vị thị trường."
+        "Lưu ý học thuật: Dữ liệu tiền lương được tổng hợp từ 15 tin tuyển dụng mô phỏng giai đoạn 05/2026 – 10/2026. "
+        "Đơn vị tính: Triệu VNĐ/tháng (Gross). "
+        "Mức lương trung bình thị trường (31.2 tr) là trung bình cộng số học của các trung điểm (salary midpoint = (min + max)/2), "
+        f"trong khi mức lương trung vị (median midpoint) thực tế đạt {round(median_salary, 1)} tr/tháng."
     )
 
     return BIDashboardData(
@@ -138,8 +207,11 @@ def get_bi_dashboard_data(db: Session) -> BIDashboardData:
         total_employers=total_employers,
         total_applications=total_applications,
         avg_market_salary_mid=round(avg_mid_salary, 1),
+        median_salary_mid=round(median_salary, 1),
         skill_distribution=skill_distribution,
         salary_trends=salary_trends,
         funnel_stages=funnel_stages,
+        domain_stats=domain_stats,
+        bi_insights=bi_insights,
         salary_notes=salary_notes
     )

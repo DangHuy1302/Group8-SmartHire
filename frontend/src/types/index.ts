@@ -73,12 +73,14 @@ export interface MatchResponse {
   extracted_cv_skills: string[];
   required_job_skills: string[];
   evaluation_comment: string;
+  inference_time_ms?: number;
 }
 
 export interface SkillStatItem {
   skill_name: string;
   category: string;
   candidate_count: number;
+  job_demand_count?: number;
 }
 
 export interface SalaryTrendItem {
@@ -97,15 +99,26 @@ export interface FunnelStageItem {
   step_conversion_rate: number;
 }
 
+export interface DomainStatItem {
+  domain?: string;
+  domain_name?: string;
+  job_count: number;
+  avg_salary_mid: number;
+  top_skills?: string[];
+}
+
 export interface BIDashboardData {
   total_candidates: number;
   total_jobs: number;
   total_employers: number;
   total_applications: number;
   avg_market_salary_mid: number;
+  median_salary_mid: number;
   skill_distribution: SkillStatItem[];
   salary_trends: SalaryTrendItem[];
   funnel_stages: FunnelStageItem[];
+  domain_stats: DomainStatItem[];
+  bi_insights: string[];
   salary_notes: string;
 }
 

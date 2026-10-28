@@ -49,8 +49,9 @@ export const api = {
     return res.data;
   },
 
-  getBIDashboard: async (): Promise<BIDashboardData> => {
-    const res = await apiClient.get<BIDashboardData>('/bi/dashboard');
+  getBIDashboard: async (category?: string): Promise<BIDashboardData> => {
+    const params = category && category !== 'All' ? `?category=${encodeURIComponent(category)}` : '';
+    const res = await apiClient.get<BIDashboardData>(`/bi/dashboard${params}`);
     return res.data;
   },
 
@@ -64,3 +65,4 @@ export const api = {
     return res.data;
   }
 };
+

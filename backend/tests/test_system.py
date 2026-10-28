@@ -224,3 +224,4 @@ def test_evaluation_metrics_and_no_faking():
         eval_res["false_positives"] + eval_res["false_negatives"]
     )
     assert total_samples == 12
+

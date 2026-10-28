@@ -1,4 +1,6 @@
 import os
+import sys
+import time
 import subprocess
 from typing import List, Optional
 from fastapi import FastAPI, Depends, HTTPException, Query
@@ -182,6 +184,7 @@ def analyze_cv_matching(req: MatchRequest, db: Session = Depends(get_db)):
     predefined_skills = [js.skill.name for js in job.skills if js.skill]
     emp_name = job.employer.name if job.employer else "Không xác định"
 
+    start_perf = time.perf_counter()
     match_result = matching_engine.match_cv_to_job(
         cv_text=req.cv_text,
         job_description=job.description,
@@ -190,6 +193,7 @@ def analyze_cv_matching(req: MatchRequest, db: Session = Depends(get_db)):
         weight_tfidf=req.weight_tfidf,
         weight_skills=req.weight_skills
     )
+    inference_ms = round((time.perf_counter() - start_perf) * 1000.0, 2)
 
     return MatchResponse(
         job_id=job.id,
@@ -202,7 +206,8 @@ def analyze_cv_matching(req: MatchRequest, db: Session = Depends(get_db)):
         missing_skills=match_result["missing_skills"],
         extracted_cv_skills=match_result["extracted_cv_skills"],
         required_job_skills=match_result["required_job_skills"],
-        evaluation_comment=match_result["evaluation_comment"]
+        evaluation_comment=match_result["evaluation_comment"],
+        inference_time_ms=inference_ms
     )
 
 
@@ -210,14 +215,19 @@ def analyze_cv_matching(req: MatchRequest, db: Session = Depends(get_db)):
 # 4. DASHBOARD BI (CHECKLIST 3)
 # ==========================================
 @app.get("/api/v1/bi/dashboard", response_model=BIDashboardData, tags=["BI Dashboard"])
-def get_bi_analytics(db: Session = Depends(get_db)):
+def get_bi_analytics(
+    category: Optional[str] = Query(None, description="Lọc kỹ năng theo nhóm danh mục"),
+    db: Session = Depends(get_db)
+):
     """
-    Trả về dữ liệu tính toán cho 3 nhóm biểu đồ BI:
-    1. Số lượng ứng viên theo kỹ năng
+    Trả về dữ liệu tính toán cho 3 nhóm biểu đồ BI chính + biểu đồ phân bố nhóm chuyên môn:
+    1. Số lượng ứng viên theo kỹ năng (hỗ trợ lọc danh mục)
     2. Xu hướng mức lương theo thời gian (từ các JD mô phỏng)
     3. Tỷ lệ chuyển đổi qua các giai đoạn tuyển dụng (dựa trên phễu nhất quán)
+    4. Phân bố việc làm và mức lương theo nhóm chuyên môn
+    5. Nhận xét BI tự động sinh bằng quy tắc từ số liệu thật
     """
-    return get_bi_dashboard_data(db)
+    return get_bi_dashboard_data(db, category_filter=category)
 
 
 # ==========================================
@@ -237,17 +247,18 @@ def get_model_evaluation(
     return evaluate_matching_model(matching_engine, threshold=threshold)
 
 
-@app.get("/api/v1/testing/run-suite", tags=["Testing"])
+@app.api_route("/api/v1/testing/run-suite", methods=["GET", "POST"], tags=["Testing"])
 def run_automated_test_suite():
     """
-    Chạy trực tiếp pytest và trả về tóm tắt kết quả
+    Chạy trực tiếp pytest trong môi trường phát triển cục bộ và trả về tóm tắt kết quả
     """
     backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     test_path = os.path.join(backend_dir, "tests", "test_system.py")
+    python_exe = sys.executable
     
     try:
         res = subprocess.run(
-            ["pytest", test_path, "-v", "--tb=short"],
+            [python_exe, "-m", "pytest", test_path, "-v", "--tb=short"],
             capture_output=True,
             text=True,
             timeout=30,
@@ -264,3 +275,4 @@ def run_automated_test_suite():
             "status": "error",
             "message": str(e)
         }
+

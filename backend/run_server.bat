@@ -14,3 +14,4 @@ if errorlevel 1 (
     echo [ERROR] Backend process terminated with an error.
     pause
 )
+

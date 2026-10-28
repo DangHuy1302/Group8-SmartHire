@@ -78,13 +78,14 @@ class MatchResponse(BaseModel):
     job_title: str
     employer_name: str
     matching_score: float = Field(..., description="Điểm phù hợp tổng hợp (0 - 100)")
-    tfidf_similarity: float = Field(..., description="Độ tương đồng ngữ nghĩa TF-IDF Cosine (0 - 100)")
+    tfidf_similarity: float = Field(..., description="Độ tương đồng văn bản TF-IDF Cosine (0 - 100)")
     skill_match_ratio: float = Field(..., description="Tỷ lệ kỹ năng đáp ứng (0 - 100)")
     matched_skills: List[str] = Field(..., description="Các kỹ năng trùng khớp")
     missing_skills: List[str] = Field(..., description="Các kỹ năng còn thiếu theo yêu cầu JD")
     extracted_cv_skills: List[str] = Field(..., description="Toàn bộ kỹ năng trích xuất được từ CV")
     required_job_skills: List[str] = Field(..., description="Toàn bộ kỹ năng yêu cầu trong JD")
     evaluation_comment: str = Field(..., description="Nhận xét sơ bộ mức độ phù hợp")
+    inference_time_ms: float = Field(0.0, description="Thời gian thực thi thuật toán phân tích (mili-giây)")
 
 # BI Dashboard schemas
 class SkillStatItem(BaseModel):
@@ -106,15 +107,25 @@ class FunnelStageItem(BaseModel):
     conversion_rate_from_applied: float  # Tỷ lệ so với giai đoạn Ứng tuyển (%)
     step_conversion_rate: float          # Tỷ lệ so với bước trước đó (%)
 
+class DomainStatItem(BaseModel):
+    domain_name: str
+    domain: Optional[str] = None
+    job_count: int
+    avg_salary_mid: float
+    top_skills: List[str] = []
+
 class BIDashboardData(BaseModel):
     total_candidates: int
     total_jobs: int
     total_employers: int
     total_applications: int
     avg_market_salary_mid: float
+    median_salary_mid: float
     skill_distribution: List[SkillStatItem]
     salary_trends: List[SalaryTrendItem]
     funnel_stages: List[FunnelStageItem]
+    domain_stats: List[DomainStatItem] = []
+    bi_insights: List[str] = []
     salary_notes: str
 
 # System overview / DB stats

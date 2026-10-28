@@ -1,17 +1,26 @@
-# Python
+# Python - môi trường và cache
 venv/
 __pycache__/
 *.py[cod]
 *$py.class
 .pytest_cache/
-*.db-journal
 
-# Node
+# Node.js - thư viện cài lại được
 node_modules/
-frontend/node_modules/
-frontend/dist/
-dist/
-.DS_Store
 
-# OS
+# Frontend - file build và cache
+dist/
+.vite/
+
+# File tạm
+*.db-journal
+*.db-wal
+*.db-shm
+*.log
+.DS_Store
 Thumbs.db
+
+# Thông tin bí mật
+.env
+.env.*
+!.env.example

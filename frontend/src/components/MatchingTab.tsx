@@ -3,7 +3,7 @@ import { api } from '../services/api';
 import { JobSimple, JobDetail, CandidateSimple, MatchResponse } from '../types';
 import { 
   Sparkles, CheckCircle, XCircle, ArrowRight, 
-  HelpCircle, Sliders, FileText, Briefcase, Zap, AlertCircle
+  HelpCircle, Sliders, FileText, Briefcase, Zap, AlertCircle, Clock
 } from 'lucide-react';
 
 export const MatchingTab: React.FC = () => {
@@ -36,7 +36,7 @@ export const MatchingTab: React.FC = () => {
           setSelectedJobId(jobsData[0].id);
         }
       } catch (err) {
-        setError('Không thể tải danh sách JD và Ứng viên từ Backend.');
+        setError('Không thể tải danh sách JD và Ứng viên từ Backend FastAPI. Vui lòng kiểm tra cổng 8000.');
       }
     };
     initData();
@@ -56,19 +56,20 @@ export const MatchingTab: React.FC = () => {
     try {
       const detail = await api.getCandidateDetail(candId);
       setCvText(detail.cv_text);
+      setError(null);
     } catch (err) {
-      console.error(err);
+      setError('Không thể lấy chi tiết CV ứng viên từ server.');
     }
   };
 
   // Gọi API phân tích Matching
   const handleAnalyze = async () => {
     if (!selectedJobId) {
-      setError('Vui lòng chọn một tin tuyển dụng (Job Description).');
+      setError('Vui lòng chọn một tin tuyển dụng (Job Description) từ danh sách.');
       return;
     }
     if (!cvText.trim()) {
-      setError('Vui lòng nhập nội dung CV hoặc chọn một ứng viên mẫu.');
+      setError('Vui lòng nhập nội dung văn bản CV hoặc chọn một ứng viên mẫu để phân tích.');
       return;
     }
 
@@ -83,7 +84,7 @@ export const MatchingTab: React.FC = () => {
       });
       setResult(res);
     } catch (err: any) {
-      setError(err?.response?.data?.detail || 'Lỗi khi gọi API phân tích Matching.');
+      setError(err?.response?.data?.detail || 'Lỗi khi gọi API phân tích Matching từ FastAPI. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
@@ -107,9 +108,9 @@ export const MatchingTab: React.FC = () => {
         </div>
         <p className="text-sm text-slate-600 leading-relaxed">
           Hệ thống sử dụng kỹ thuật <strong>TF-IDF (Term Frequency - Inverse Document Frequency)</strong> kết hợp 
-          đo khoảng cách góc <strong>Cosine Similarity</strong> trên không gian từ vựng tham chiếu chuẩn (60%) 
+          đo khoảng cách góc <strong>Cosine Similarity</strong> trên tập văn bản tham chiếu chuẩn (60%) 
           và đối sánh <strong>Từ điển kỹ năng chuẩn hóa</strong> (40%). 
-          Mọi phép tính được thực thi trực tiếp trên backend FastAPI bằng thư viện <code>scikit-learn</code>.
+          Thuật toán chạy thực tế trên backend FastAPI bằng thư viện <code>scikit-learn</code>, không sử dụng mô hình ngôn ngữ lớn (LLM) hay Deep Learning.
         </p>
       </div>
 
@@ -150,15 +151,15 @@ export const MatchingTab: React.FC = () => {
                   <span className="text-teal-700 font-medium">{selectedJobDetail.employer_name}</span>
                 </div>
                 <div>
-                  <span className="font-semibold text-slate-700">Kinh nghiệm: </span>
+                  <span className="font-semibold text-slate-700">Kinh nghiệm yêu cầu: </span>
                   <span>Tối thiểu {selectedJobDetail.min_experience_years} năm</span>
                 </div>
                 <div>
                   <span className="font-semibold text-slate-700">Mô tả công việc: </span>
-                  <p className="text-slate-600 mt-0.5">{selectedJobDetail.description}</p>
+                  <p className="text-slate-600 mt-0.5 leading-relaxed">{selectedJobDetail.description}</p>
                 </div>
                 <div>
-                  <span className="font-semibold text-slate-700">Kỹ năng yêu cầu: </span>
+                  <span className="font-semibold text-slate-700">Kỹ năng bắt buộc: </span>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {selectedJobDetail.required_skills.map((sk) => (
                       <span key={sk} className="bg-slate-200 text-slate-800 px-2 py-0.5 rounded text-[11px] font-medium">
@@ -184,7 +185,7 @@ export const MatchingTab: React.FC = () => {
             <div className="space-y-3 text-xs">
               <div>
                 <div className="flex justify-between font-medium text-slate-700 mb-1">
-                  <span>TF-IDF Cosine Similarity (Ngữ nghĩa):</span>
+                  <span>Độ tương đồng văn bản (TF-IDF + Cosine Similarity):</span>
                   <span className="font-bold text-teal-700">{Math.round(weightTfidf * 100)}%</span>
                 </div>
                 <input
@@ -200,14 +201,14 @@ export const MatchingTab: React.FC = () => {
 
               <div>
                 <div className="flex justify-between font-medium text-slate-700 mb-1">
-                  <span>Skill Match Ratio (Kỹ năng cốt lõi):</span>
+                  <span>Tỷ lệ kỹ năng đáp ứng (Skill Match Ratio):</span>
                   <span className="font-bold text-teal-700">{Math.round(weightSkills * 100)}%</span>
                 </div>
               </div>
 
-              <p className="text-[11px] text-slate-500 italic bg-amber-50 p-2.5 rounded border border-amber-200">
-                * Giải thích: Tỷ lệ 60% ngữ nghĩa văn bản và 40% kỹ năng là lựa chọn thiết kế ban đầu để vừa 
-                đánh giá toàn diện kinh nghiệm mô tả trong CV, vừa đảm bảo ứng viên bắt buộc phải nắm các công nghệ then chốt.
+              <p className="text-[11px] text-slate-500 italic bg-amber-50 p-2.5 rounded border border-amber-200 leading-relaxed">
+                * Giải thích thiết kế ban đầu: 60% mức độ tương đồng văn bản phản ánh tổng quan kinh nghiệm, 
+                và 40% tỷ lệ kỹ năng bảo đảm ứng viên bắt buộc nắm vững các công nghệ trọng tâm.
               </p>
             </div>
           </div>
@@ -243,15 +244,18 @@ export const MatchingTab: React.FC = () => {
             <textarea
               rows={9}
               value={cvText}
-              onChange={(e) => setCvText(e.target.value)}
+              onChange={(e) => {
+                setCvText(e.target.value);
+                if (error) setError(null);
+              }}
               placeholder="Nhập hoặc dán nội dung văn bản CV vào đây (hoặc chọn ứng viên mẫu ở trên)... Ví dụ: Kỹ sư Backend 3 năm kinh nghiệm lập trình Python, FastAPI, Docker, PostgreSQL..."
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-sans focus:ring-2 focus:ring-teal-500 focus:outline-none focus:bg-white transition-all"
+              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-sm font-sans focus:ring-2 focus:ring-teal-500 focus:outline-none focus:bg-white transition-all leading-relaxed"
             />
 
             <button
               onClick={handleAnalyze}
               disabled={loading}
-              className="w-full py-3 px-4 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center space-x-2 disabled:opacity-60"
+              className="w-full py-3 px-4 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center space-x-2 disabled:opacity-60 cursor-pointer"
             >
               {loading ? (
                 <>
@@ -279,8 +283,16 @@ export const MatchingTab: React.FC = () => {
                 So khớp với: {result.job_title} ({result.employer_name})
               </h3>
             </div>
-            <div className="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full self-start">
-              Trọng số: TF-IDF {Math.round(weightTfidf * 100)}% + Kỹ năng {Math.round(weightSkills * 100)}%
+            <div className="flex items-center space-x-2 self-start">
+              {result.inference_time_ms !== undefined && (
+                <span className="inline-flex items-center space-x-1 text-xs text-teal-800 bg-teal-50 border border-teal-200 px-2.5 py-1 rounded-full font-mono">
+                  <Clock className="w-3.5 h-3.5 text-teal-600" />
+                  <span>Thời gian đo: {result.inference_time_ms} ms</span>
+                </span>
+              )}
+              <span className="text-xs text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+                Trọng số: {Math.round(weightTfidf * 100)}% TF-IDF + {Math.round(weightSkills * 100)}% Kỹ năng
+              </span>
             </div>
           </div>
 
@@ -303,16 +315,16 @@ export const MatchingTab: React.FC = () => {
               </div>
             </div>
 
-            {/* TF-IDF Cosine Similarity */}
+            {/* Độ tương đồng văn bản TF-IDF */}
             <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-2">
-              <p className="text-xs font-bold text-slate-600 uppercase tracking-wide">Tương đồng ngữ nghĩa (TF-IDF)</p>
+              <p className="text-xs font-bold text-slate-600 uppercase tracking-wide">Độ tương đồng văn bản (TF-IDF)</p>
               <div className="text-3xl font-extrabold text-blue-600">
                 {result.tfidf_similarity}%
               </div>
               <p className="text-[11px] text-slate-500">Đo bằng Cosine Similarity trên tập từ vựng chuẩn</p>
             </div>
 
-            {/* Skill Match Ratio */}
+            {/* Tỷ lệ kỹ năng đáp ứng */}
             <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 text-center space-y-2">
               <p className="text-xs font-bold text-slate-600 uppercase tracking-wide">Tỷ lệ kỹ năng đáp ứng</p>
               <div className="text-3xl font-extrabold text-indigo-600">
@@ -342,7 +354,7 @@ export const MatchingTab: React.FC = () => {
                 <p className="text-xs text-slate-500 italic">Không có kỹ năng nào trùng khớp với JD.</p>
               ) : (
                 <div className="flex flex-wrap gap-1.5">
-                  {result.matched_skills.map((skill) => (
+                  {(result.matched_skills || []).map((skill) => (
                     <span 
                       key={skill}
                       className="inline-flex items-center space-x-1 bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-1 rounded-md text-xs font-semibold"
@@ -364,7 +376,7 @@ export const MatchingTab: React.FC = () => {
                 <p className="text-xs text-emerald-700 font-medium">Ứng viên đáp ứng đầy đủ tất cả kỹ năng yêu cầu!</p>
               ) : (
                 <div className="flex flex-wrap gap-1.5">
-                  {result.missing_skills.map((skill) => (
+                  {(result.missing_skills || []).map((skill) => (
                     <span 
                       key={skill}
                       className="inline-flex items-center space-x-1 bg-rose-100 text-rose-800 border border-rose-300 px-2.5 py-1 rounded-md text-xs font-semibold"
