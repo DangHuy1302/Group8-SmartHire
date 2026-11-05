@@ -3,7 +3,7 @@ import sys
 import time
 import subprocess
 from typing import List, Optional
-from fastapi import FastAPI, Depends, HTTPException, Query
+from fastapi import FastAPI, Depends, HTTPException, Query, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -12,11 +12,14 @@ from .database import get_db, engine, Base
 from .models import Employer, Candidate, Job, Skill, CandidateSkill, JobSkill, Application
 from .schemas import (
     SystemStats, JobSimple, JobDetail, CandidateSimple, CandidateDetail,
-    MatchRequest, MatchResponse, BIDashboardData, EvaluationSummary
+    MatchRequest, MatchResponse, CustomJobMatchRequest, CVExtractResponse,
+    BIDashboardData, EvaluationSummary, SkillGapItem, CVSectionRecommendation
 )
 from .ml_service import matching_engine
 from .bi_service import get_bi_dashboard_data
 from .ground_truth import evaluate_matching_model
+from .cv_parser import extract_text_from_cv_file
+from .skill_gap_service import generate_skill_gaps, generate_cv_outline_recommendations
 
 # Khởi tạo bảng nếu chưa có
 Base.metadata.create_all(bind=engine)
@@ -163,18 +166,65 @@ def get_candidate_detail(candidate_id: int, db: Session = Depends(get_db)):
 
 
 # ==========================================
-# 3. AI/ML CV MATCHING (CHECKLIST 2)
+# 3. AI/ML CV MATCHING, UPLOAD & SKILL GAPS (CHECKLIST 2 & NÂNG CẤP)
 # ==========================================
+@app.post("/api/v1/cv/extract-text", response_model=CVExtractResponse, tags=["AI Matching"])
+async def extract_cv_text_from_file(file: UploadFile = File(...)):
+    """
+    Trích xuất nội dung văn bản thực sự từ file CV dạng PDF hoặc DOCX.
+    - Không lưu trữ tệp vào database để bảo mật dữ liệu cá nhân.
+    - Phát hiện file PDF scan không có text layer để thông báo rõ ràng cho người dùng.
+    """
+    filename = file.filename or "uploaded_cv"
+    lower_name = filename.lower()
+    if not (lower_name.endswith(".pdf") or lower_name.endswith(".docx")):
+        raise HTTPException(
+            status_code=400,
+            detail="Định dạng tệp không được hỗ trợ. Vui lòng chỉ tải lên tệp PDF (.pdf) hoặc Word (.docx)."
+        )
+
+    try:
+        content = await file.read()
+        if len(content) == 0:
+            raise HTTPException(status_code=400, detail="Tệp tải lên rỗng (0 bytes).")
+        
+        extracted_text, file_type = extract_text_from_cv_file(content, filename)
+        
+        if not extracted_text or not extracted_text.strip():
+            raise HTTPException(
+                status_code=400,
+                detail="Tệp không chứa văn bản trích xuất được. Nếu là file scan/ảnh chụp, vui lòng dán nội dung trực tiếp."
+            )
+
+        words = len(extracted_text.split())
+        chars = len(extracted_text)
+
+        return CVExtractResponse(
+            text=extracted_text,
+            filename=filename,
+            file_type=file_type,
+            char_count=chars,
+            word_count=words,
+            status="success",
+            message=f"Đã trích xuất thành công {words} từ ({chars} ký tự) từ tệp {file_type}."
+        )
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Lỗi khi đọc file: {str(e)}")
+
+
 @app.post("/api/v1/matching/analyze", response_model=MatchResponse, tags=["AI Matching"])
 def analyze_cv_matching(req: MatchRequest, db: Session = Depends(get_db)):
     """
-    API Phân tích mức độ phù hợp giữa CV và JD:
+    API Phân tích mức độ phù hợp giữa CV và JD mẫu trong Database:
     - Xử lý văn bản CV dạng text
     - Trích xuất kỹ năng bằng bộ từ điển chuẩn hóa regex
     - Vector hóa TF-IDF bằng vectorizer tham chiếu đã fit sẵn
     - Đo Cosine Similarity (trọng số mặc định 60%)
     - Đo tỷ lệ kỹ năng phù hợp (trọng số mặc định 40%)
-    - Trả về Matching Score (0 - 100), kỹ năng trùng khớp và còn thiếu
+    - Tự động sinh phân tích khoảng trống kỹ năng (Skill Gaps)
+    - Tự động gợi ý cải thiện 6 phần cốt lõi của Outline CV
     """
     job = db.query(Job).filter(Job.id == req.job_id).first()
     if not job:
@@ -195,6 +245,19 @@ def analyze_cv_matching(req: MatchRequest, db: Session = Depends(get_db)):
     )
     inference_ms = round((time.perf_counter() - start_perf) * 1000.0, 2)
 
+    # Sinh phân tích khoảng trống kỹ năng (Skill Gaps) và gợi ý cải thiện CV Outline
+    gaps_raw = generate_skill_gaps(match_result["missing_skills"], job.title, max_gaps=5)
+    outline_raw = generate_cv_outline_recommendations(
+        cv_skills=match_result["extracted_cv_skills"],
+        matched_skills=match_result["matched_skills"],
+        missing_skills=match_result["missing_skills"],
+        job_title=job.title,
+        employer_name=emp_name
+    )
+
+    skill_gaps = [SkillGapItem(**g) for g in gaps_raw]
+    outline_recs = [CVSectionRecommendation(**o) for o in outline_raw]
+
     return MatchResponse(
         job_id=job.id,
         job_title=job.title,
@@ -207,7 +270,67 @@ def analyze_cv_matching(req: MatchRequest, db: Session = Depends(get_db)):
         extracted_cv_skills=match_result["extracted_cv_skills"],
         required_job_skills=match_result["required_job_skills"],
         evaluation_comment=match_result["evaluation_comment"],
-        inference_time_ms=inference_ms
+        inference_time_ms=inference_ms,
+        skill_gaps=skill_gaps,
+        cv_outline_recommendations=outline_recs,
+        is_custom_jd=False
+    )
+
+
+@app.post("/api/v1/matching/analyze-custom", response_model=MatchResponse, tags=["AI Matching"])
+def analyze_custom_cv_matching(req: CustomJobMatchRequest):
+    """
+    API Phân tích mức độ phù hợp giữa CV và JD Tùy Chỉnh do người dùng tự nhập:
+    - Đưa trực tiếp nội dung JD tùy chỉnh vào mô hình ML thực tế (TF-IDF + Skill Taxonomy)
+    - Tự động sinh phân tích khoảng trống kỹ năng (Skill Gaps)
+    - Tự động gợi ý cải thiện Outline CV theo đúng vị trí tùy chỉnh
+    """
+    if not req.job_title.strip():
+        raise HTTPException(status_code=400, detail="Vui lòng nhập tên vị trí tuyển dụng.")
+    if not req.description.strip():
+        raise HTTPException(status_code=400, detail="Vui lòng nhập mô tả yêu cầu công việc của JD.")
+
+    emp_name = req.employer_name.strip() if req.employer_name else "Doanh nghiệp tuyển dụng"
+
+    start_perf = time.perf_counter()
+    match_result = matching_engine.match_cv_to_job(
+        cv_text=req.cv_text,
+        job_description=req.description,
+        job_requirements=f"Vị trí: {req.job_title}\nKỹ năng yêu cầu: {', '.join(req.required_skills)}",
+        predefined_job_skills=req.required_skills,
+        weight_tfidf=req.weight_tfidf,
+        weight_skills=req.weight_skills
+    )
+    inference_ms = round((time.perf_counter() - start_perf) * 1000.0, 2)
+
+    gaps_raw = generate_skill_gaps(match_result["missing_skills"], req.job_title, max_gaps=5)
+    outline_raw = generate_cv_outline_recommendations(
+        cv_skills=match_result["extracted_cv_skills"],
+        matched_skills=match_result["matched_skills"],
+        missing_skills=match_result["missing_skills"],
+        job_title=req.job_title,
+        employer_name=emp_name
+    )
+
+    skill_gaps = [SkillGapItem(**g) for g in gaps_raw]
+    outline_recs = [CVSectionRecommendation(**o) for o in outline_raw]
+
+    return MatchResponse(
+        job_id=None,
+        job_title=req.job_title,
+        employer_name=emp_name,
+        matching_score=match_result["matching_score"],
+        tfidf_similarity=match_result["tfidf_similarity"],
+        skill_match_ratio=match_result["skill_match_ratio"],
+        matched_skills=match_result["matched_skills"],
+        missing_skills=match_result["missing_skills"],
+        extracted_cv_skills=match_result["extracted_cv_skills"],
+        required_job_skills=match_result["required_job_skills"],
+        evaluation_comment=match_result["evaluation_comment"],
+        inference_time_ms=inference_ms,
+        skill_gaps=skill_gaps,
+        cv_outline_recommendations=outline_recs,
+        is_custom_jd=True
     )
 
 

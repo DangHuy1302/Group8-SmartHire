@@ -28,7 +28,12 @@ export const TestingTab: React.FC = () => {
     { id: 9, name: 'test_matching_api_nonexistent_job', desc: 'Kiểm thử dữ liệu đầu vào sai: Job ID không tồn tại -> Trả về mã lỗi HTTP 404' },
     { id: 10, name: 'test_bi_dashboard_api_and_data_integrity', desc: 'Kiểm tra tính vẹn toàn của 3 nhóm biểu đồ BI và các số liệu' },
     { id: 11, name: 'test_bi_recruitment_funnel_monotonicity', desc: 'Kiểm tra tính nhất quán logic của phễu (Applied >= Screening >= Interview >= Offered)' },
-    { id: 12, name: 'test_evaluation_metrics_and_no_faking', desc: 'Đo lường các chỉ số Precision, Recall, F1 trên tập 12 cặp gán nhãn thực nghiệm' }
+    { id: 12, name: 'test_evaluation_metrics_and_no_faking', desc: 'Đo lường các chỉ số Precision, Recall, F1 trên tập 12 cặp gán nhãn thực nghiệm' },
+    { id: 13, name: 'test_cv_file_extraction_docx', desc: 'Kiểm tra trích xuất nội dung từ tệp DOCX thực tế và xử lý định dạng không hợp lệ' },
+    { id: 14, name: 'test_cv_file_extraction_pdf_valid_and_scanned', desc: 'Trích xuất văn bản từ PDF có text layer và bắt lỗi OCR với PDF scan/ảnh' },
+    { id: 15, name: 'test_custom_jd_matching_api', desc: 'Kiểm tra phân tích so khớp thuật toán thực tế với JD tùy chỉnh người dùng nhập' },
+    { id: 16, name: 'test_skill_gaps_content_and_honesty', desc: 'Kiểm tra tính trung thực của Skill Gaps (không bịa thiếu, nhãn khách quan)' },
+    { id: 17, name: 'test_cv_outline_recommendations_structure', desc: 'Kiểm tra cấu trúc 6 phần cốt lõi của đề xuất tái cấu trúc Outline CV' }
   ];
 
   // Lấy dữ liệu đánh giá mô hình
@@ -269,7 +274,7 @@ export const TestingTab: React.FC = () => {
           <div>
             <h3 className="text-base font-bold text-slate-800 flex items-center space-x-2">
               <ListChecks className="w-5 h-5 text-indigo-600" />
-              <span>2. Bộ Kiểm thử Hệ thống (Automated Pytest Suite — 12 Cases)</span>
+              <span>2. Bộ Kiểm thử Hệ thống (Automated Pytest Suite — 17 Cases)</span>
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
               Bao quát toàn diện: Database, REST API, Thuật toán AI, Biên rỗng và Tính logic của BI
