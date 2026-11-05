@@ -54,6 +54,23 @@ export interface CandidateDetail {
   skills: string[];
 }
 
+export interface SkillGapItem {
+  skill_name: string;
+  status_label: string;
+  importance: string;
+  evidence_suggestion: string;
+  learning_path: string;
+}
+
+export interface CVSectionRecommendation {
+  section_id: string;
+  section_name: string;
+  keep_advice: string;
+  priority_advice: string;
+  evidence_advice: string;
+  learning_caution: string;
+}
+
 export interface MatchRequest {
   cv_text: string;
   job_id: number;
@@ -61,8 +78,19 @@ export interface MatchRequest {
   weight_skills?: number;
 }
 
+export interface CustomJobMatchRequest {
+  cv_text: string;
+  job_title: string;
+  employer_name?: string;
+  description: string;
+  required_skills: string[];
+  source_url?: string;
+  weight_tfidf?: number;
+  weight_skills?: number;
+}
+
 export interface MatchResponse {
-  job_id: number;
+  job_id?: number | null;
   job_title: string;
   employer_name: string;
   matching_score: number;
@@ -74,6 +102,19 @@ export interface MatchResponse {
   required_job_skills: string[];
   evaluation_comment: string;
   inference_time_ms?: number;
+  skill_gaps?: SkillGapItem[];
+  cv_outline_recommendations?: CVSectionRecommendation[];
+  is_custom_jd?: boolean;
+}
+
+export interface CVExtractResponse {
+  text: string;
+  filename: string;
+  file_type: string;
+  char_count: number;
+  word_count: number;
+  status: string;
+  message?: string;
 }
 
 export interface SkillStatItem {

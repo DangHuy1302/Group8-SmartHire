@@ -59,44 +59,55 @@
 
 ---
 
-### PHẦN 2: MINH CHỨNG AI/ML CV MATCHING (CHECKLIST 2)
+### PHẦN 2: MINH CHỨNG AI/ML CV MATCHING & SKILL GAPS (CHECKLIST 2 & NÂNG CẤP)
 ⏱ **Thời lượng**: Phút 02:30 – Phút 05:30 (3.0 phút)  
 🖥 **Màn hình mở**: Bấm chuyển sang **Tab 2: 2. AI CV Matching**
 
-#### Thao tác trên màn hình:
-1. **Ca 1 (Hồ sơ rất phù hợp — Strong Match)**:
-   - Tại ô chọn JD, chọn Job **#1 — Senior Python Backend Engineer**.
-   - Tại ô "Mẫu có sẵn", chọn ứng viên **Nguyễn Văn An (Backend Developer)**.
-   - Thấy nội dung CV được tự động điền: *"Kỹ sư Backend 3 năm kinh nghiệm lập trình Python, FastAPI..."*
-   - Rê chuột vào phần **Trọng số thử nghiệm**: Chỉ vào thanh trượt (60% Độ tương đồng văn bản TF-IDF + Cosine Similarity và 40% Tỷ lệ kỹ năng).
-   - Nhấn nút **"Phân tích mức độ phù hợp"**.
-   - **Bằng chứng xuất hiện**: Thanh điểm Matching Score hiện ra rất cao (74.3%), màu xanh lá cây; Độ tương đồng văn bản (TF-IDF + Cosine Similarity) hiện rõ; Tỷ lệ kỹ năng hiện rõ; Thời gian suy luận hiển thị **Inference time: ~2ms – 10ms**; Hộp "Kỹ năng phù hợp" hiển thị màu xanh: *Python, FastAPI, PostgreSQL, Docker, Git, RESTful API*; Hộp "Kỹ năng còn thiếu" trống hoặc ít.
-2. **Ca 2 (Hồ sơ trái ngành — Mismatch)**:
-   - Giữ nguyên Job #1 (Python Backend).
-   - Tại ô ứng viên mẫu, chọn **Bùi Mai Hương (Senior Accountant)** (Kế toán tổng hợp).
-   - Nhấn nút **"Phân tích mức độ phù hợp"**.
-   - **Bằng chứng xuất hiện**: Matching Score tụt xuống thấp (2.1%), thanh điểm màu đỏ; Tỷ lệ kỹ năng 0%; Kỹ năng phù hợp trống; Kỹ năng còn thiếu hiển thị toàn bộ kỹ năng yêu cầu. Nhận xét hệ thống chuyển thành *"Không phù hợp (Mismatch)"*.
-3. **Ca 3 (Kiểm thử trường hợp biên — Empty CV)**:
-   - Xóa sạch nội dung CV trong ô textarea.
-   - Nhấn nút phân tích.
-   - Hệ thống thông báo lỗi validation rõ ràng: *"Vui lòng nhập nội dung văn bản CV để thực hiện phân tích"*, bảo đảm tính ổn định và an toàn của hệ thống.
+#### Thao tác trên màn hình (Thao tác tuần tự 2–3 phút):
+1. **Minh chứng Tải file CV thực tế (PDF/DOCX)**:
+   - Nhấn nút **"Tải CV (PDF/DOCX)"** màu xanh ngọc.
+   - Chọn tệp mẫu trong thư mục `sample_cvs/` (ví dụ `CV_Nguyen_Van_An_Backend.docx` hoặc `CV_Tran_Thi_Bich_Frontend.pdf`).
+   - Màn hình hiện thông báo: *"Đã trích xuất thành công X từ từ file..."* và toàn bộ văn bản được tự động điền vào khung textarea để người dùng xem và chỉnh sửa.
+   - *(Tùy chọn minh chứng bắt lỗi)*: Thử tải một file không đúng định dạng hoặc file scan rỗng &rarr; hệ thống hiện cảnh báo thân thiện: *"Chưa hỗ trợ OCR, vui lòng dán văn bản trực tiếp"*.
+2. **Minh chứng Chế độ JD Tùy chỉnh (Nhập JD của bạn)**:
+   - Tại cột bên trái, bấm nút chuyển tab sang **"Nhập JD của bạn"**.
+   - Nhập vị trí: *Senior React Frontend Developer*, Công ty: *FPT Software*.
+   - Nhập mô tả: *Tuyển lập trình viên React có kinh nghiệm với Next.js và Tailwind CSS*.
+   - Bấm thêm nhanh các kỹ năng yêu cầu: *React, TypeScript, Next.js, Tailwind CSS*.
+3. **Thực thi phân tích Matching thực tế**:
+   - Nhấn nút **"Phân tích mức độ phù hợp & Skill Gaps"**.
+   - **Bằng chứng xuất hiện**:
+     + Nhãn: *JD Tùy chỉnh* kèm *Thời gian đo (Inference time: ~2–10 ms)*.
+     + 3 đồng hồ chỉ số: Matching Score, TF-IDF Cosine Similarity, Tỷ lệ kỹ năng đáp ứng.
+     + Hộp Kỹ năng phù hợp (✓ React, TypeScript, Tailwind CSS).
+     + Hộp Kỹ năng chưa nhận diện (✕ Next.js).
+4. **Minh chứng Phân tích khoảng trống kỹ năng (Skill Gaps Analysis)**:
+   - Cuộn nhẹ xuống khung màu đen **"Phân tích khoảng trống kỹ năng (Skill Gaps Analysis)"**.
+   - Chỉ vào khoảng trống kỹ năng *Next.js* kèm nhãn chuẩn xác: **"Chưa tìm thấy minh chứng trong CV"**.
+   - Đọc lướt 3 cột phân tích: 📌 *Tầm quan trọng đối với JD*, 💡 *Minh chứng nên bổ sung nếu đã có kinh nghiệm*, 📚 *Lộ trình học tập & thực hành*.
+   - Nhấn mạnh: Hệ thống dùng Rule-based Knowledge Base thực tế, không bịa kỹ năng thiếu nếu danh sách thiếu ít hơn 3.
+5. **Minh chứng Gợi ý Tái cấu trúc Outline CV (6 phần cốt lõi)**:
+   - Cuộn đến khung **"Đề xuất cải thiện & Tái cấu trúc Outline CV"**.
+   - Thao tác bấm nút Thu gọn / Xem chi tiết để thấy tính năng collapsible.
+   - Lướt qua 6 phần: *Thông tin cá nhân, Tóm tắt nghề nghiệp, Kỹ năng chuyên môn, Dự án nổi bật, Kinh nghiệm làm việc, Học vấn & Chứng chỉ*.
+   - Nhấn mạnh: Đề xuất bám sát vị trí tuyển dụng, bảo đảm tính trung thực, không tự nhận kỹ năng chưa học.
 
 #### Lời thoại thuyết minh:
-> *"Tiếp theo, em xin chuyển sang **Checklist 2: Mô hình AI/ML CV Matching**.*
+> *"Tiếp theo, em xin chuyển sang **Checklist 2: Mô hình AI/ML CV Matching & Phân tích khoảng trống kỹ năng (Skill Gaps)**.*
 >
-> *Xin nhấn mạnh rằng: Hệ thống của nhóm hoàn toàn sử dụng thuật toán Machine Learning truyền thống dựa trên toán học xác suất và tần suất từ vựng (Scikit-learn), **tuyệt đối không phải là một giao diện giả lập và không gọi sai là Deep Learning hay LLM**.*
+> *Xin nhấn mạnh rằng: Hệ thống hoàn toàn sử dụng thuật toán Machine Learning toán học (TF-IDF vectorizer fit trên tập văn bản tham chiếu IT chuẩn kết hợp Cosine Similarity 60% và Skill Taxonomy 40%), **tuyệt đối không phải giao diện giả lập và không sử dụng LLM hay AI tạo sinh ngoài thực tế**.*
 >
-> *Quy trình xử lý gồm 4 bước:*
-> 1. *Chuẩn hóa văn bản và trích xuất kỹ năng bằng bộ từ điển Regex chuẩn hóa.*
-> 2. *Vector hóa văn bản bằng TF-IDF. Điểm then chốt trong thiết kế của nhóm là **Vectorizer được fit sẵn trên một tập văn bản tham chiếu chuẩn (Reference Corpus)** của ngành phần mềm. Điều này giúp trọng số IDF cố định và khách quan, tránh việc fit cục bộ trên từng CV làm mất tính nhất quán.*
-> 3. *Đo độ tương đồng văn bản bằng Cosine Similarity.*
-> 4. *Kết hợp với tỷ lệ kỹ năng đáp ứng theo công thức trọng số ban đầu: 60% độ tương đồng văn bản TF-IDF và 40% tỷ lệ kỹ năng cốt lõi.*
+> *Điểm nâng cấp nổi bật đầu tiên là **Hỗ trợ tải tệp CV thực tế dạng PDF hoặc Word .docx**: Em bấm nút 'Tải CV', chọn file CV thực tế trên máy tính — Backend FastAPI dùng thư viện pypdf và python-docx trích xuất văn bản tức thì và hiển thị lên khung soạn thảo để ứng viên có thể rà soát và chỉnh sửa.*
 >
-> *Bây giờ em sẽ thực hiện phân tích mẫu: Khi chọn tin tuyển dụng **Python Backend** và chọn ứng viên **Nguyễn Văn An**, nhấn 'Phân tích' — Backend FastAPI tính toán tức thì chỉ trong **vài mili-giây**, trả về Matching Score 74.3%, chỉ rõ các kỹ năng trùng khớp như Python, FastAPI, PostgreSQL và đưa ra đánh giá Rất phù hợp.*
+> *Thứ hai, hệ thống bổ sung chế độ **'Nhập JD của bạn'**: Cho phép người dùng dán tin tuyển dụng bất kỳ từ thị trường (TopCV, LinkedIn, VietnamWorks) với vị trí, mô tả và kỹ năng tùy chỉnh. Toàn bộ dữ liệu này được đưa trực tiếp vào thuật toán Matching thực của backend chứ không dùng kết quả giả lập của JD mẫu.*
 >
-> *Ngược lại, khi chọn hồ sơ kế toán của ứng viên **Bùi Mai Hương** ứng tuyển vào vị trí lập trình, Matching Score lập tức giảm xuống chỉ còn 2.1%, kỹ năng đáp ứng là 0% và hệ thống cảnh báo Mismatch rõ ràng.*
+> *Khi bấm 'Phân tích', hệ thống tính toán tức thì trong chưa đầy 10 mili-giây, hiển thị Matching Score, TF-IDF và tỷ lệ kỹ năng.*
 >
-> *Khi để trống CV, hệ thống kiểm tra validation và cảnh báo lỗi thân thiện mà không bị văng hệ thống."*
+> *Đặc biệt, hệ thống cung cấp 2 tính năng tư vấn chiến lược:*
+> 1. *Khung **Phân tích khoảng trống kỹ năng (Skill Gaps)**: Tự động chỉ ra tối đa 3–5 kỹ năng trọng tâm còn thiếu, kèm giải thích tầm quan trọng và lộ trình học tập cụ thể, với nhãn khách quan 'Chưa tìm thấy minh chứng trong CV'.*
+> 2. *Khung **Gợi ý tái cấu trúc Outline CV 6 phần cốt lõi**: Hướng dẫn chi tiết những gì nên giữ, những gì cần ưu tiên cho vị trí này và cảnh báo không khai gian dối thông tin.*
+>
+> *Khi thử nghiệm với hồ sơ trái ngành hoặc để trống CV, hệ thống kiểm tra validation và cảnh báo lỗi an toàn, bảo đảm độ tin cậy cao."*
 
 ---
 
@@ -154,7 +165,7 @@
 4. Cuộn xuống **Bảng chi tiết 12 cặp kiểm thử thực nghiệm**: Rê chuột qua các dòng, chỉ vào cột Ground Truth và Score thực tế.
 5. Cuộn xuống phần **Bộ kiểm thử hệ thống (Automated Pytest Suite)**:
    - Nhấn nút **"Chạy kiểm thử trực tiếp"** màu tím.
-   - Chờ 2 giây: Khung Terminal màu đen xuất hiện với dòng chữ xanh lá: `12 passed in ...s`, Exit code: 0.
+   - Chờ 2 giây: Khung Terminal màu đen xuất hiện với dòng chữ xanh lá: `17 passed in ...s`, Exit code: 0.
 6. Rê chuột vào hộp lưu ý màu vàng: Đọc phần nhận định về tính khách quan và hạn chế của tập benchmark nhỏ.
 
 #### Lời thoại thuyết minh:

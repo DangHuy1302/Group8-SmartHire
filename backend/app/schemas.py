@@ -66,6 +66,22 @@ class CandidateDetail(BaseModel):
     cv_text: str
     skills: List[str] = []
 
+# Skill Gaps & Outline Schemas
+class SkillGapItem(BaseModel):
+    skill_name: str
+    status_label: str = Field("Chưa tìm thấy minh chứng trong CV", description="Trạng thái nhận diện kỹ năng")
+    importance: str = Field(..., description="Tầm quan trọng của kỹ năng đối với vị trí")
+    evidence_suggestion: str = Field(..., description="Gợi ý bổ sung minh chứng nếu đã có kinh nghiệm")
+    learning_path: str = Field(..., description="Lộ trình học tập / thực hành nếu chưa biết")
+
+class CVSectionRecommendation(BaseModel):
+    section_id: str
+    section_name: str
+    keep_advice: str = Field(..., description="Nên giữ những thông tin nào")
+    priority_advice: str = Field(..., description="Nên ưu tiên thông tin nào cho JD đã chọn")
+    evidence_advice: str = Field(..., description="Minh chứng cần bổ sung khi có kinh nghiệm thực tế")
+    learning_caution: str = Field(..., description="Những kỹ năng cần tiếp tục học trước khi đưa vào CV")
+
 # Matching Request and Response
 class MatchRequest(BaseModel):
     cv_text: str = Field(..., description="Nội dung CV dạng văn bản")
@@ -73,8 +89,18 @@ class MatchRequest(BaseModel):
     weight_tfidf: float = Field(0.6, description="Trọng số TF-IDF Cosine Similarity (mặc định 60%)")
     weight_skills: float = Field(0.4, description="Trọng số Tỷ lệ kỹ năng phù hợp (mặc định 40%)")
 
+class CustomJobMatchRequest(BaseModel):
+    cv_text: str = Field(..., description="Nội dung CV dạng văn bản")
+    job_title: str = Field(..., description="Tên vị trí tuyển dụng")
+    employer_name: Optional[str] = Field("Doanh nghiệp tùy chỉnh", description="Tên công ty")
+    description: str = Field(..., description="Mô tả công việc")
+    required_skills: List[str] = Field(default=[], description="Danh sách kỹ năng yêu cầu")
+    source_url: Optional[str] = Field(None, description="Nguồn JD (tùy chọn)")
+    weight_tfidf: float = Field(0.6, description="Trọng số TF-IDF Cosine Similarity")
+    weight_skills: float = Field(0.4, description="Trọng số Tỷ lệ kỹ năng phù hợp")
+
 class MatchResponse(BaseModel):
-    job_id: int
+    job_id: Optional[int] = Field(None, description="ID của Job nếu là JD mẫu trong database")
     job_title: str
     employer_name: str
     matching_score: float = Field(..., description="Điểm phù hợp tổng hợp (0 - 100)")
@@ -86,6 +112,19 @@ class MatchResponse(BaseModel):
     required_job_skills: List[str] = Field(..., description="Toàn bộ kỹ năng yêu cầu trong JD")
     evaluation_comment: str = Field(..., description="Nhận xét sơ bộ mức độ phù hợp")
     inference_time_ms: float = Field(0.0, description="Thời gian thực thi thuật toán phân tích (mili-giây)")
+    skill_gaps: List[SkillGapItem] = Field(default=[], description="Phân tích chi tiết khoảng trống kỹ năng nổi bật")
+    cv_outline_recommendations: List[CVSectionRecommendation] = Field(default=[], description="Gợi ý cải thiện 6 phần cốt lõi của CV")
+    is_custom_jd: bool = Field(False, description="Đánh dấu phân tích theo JD tùy chỉnh hay JD mẫu")
+
+# File Upload Extraction Schema
+class CVExtractResponse(BaseModel):
+    text: str = Field(..., description="Nội dung văn bản trích xuất được")
+    filename: str = Field(..., description="Tên tệp gốc đã tải lên")
+    file_type: str = Field(..., description="Loại tệp (PDF hoặc DOCX)")
+    char_count: int = Field(..., description="Tổng số ký tự")
+    word_count: int = Field(..., description="Tổng số từ")
+    status: str = Field("success", description="Trạng thái trích xuất")
+    message: Optional[str] = Field(None, description="Thông điệp bổ sung")
 
 # BI Dashboard schemas
 class SkillStatItem(BaseModel):

@@ -9,9 +9,9 @@
 ## 📌 GIỚI THIỆU DỰ ÁN
 
 **SmartHire Mini** là hệ thống phần mềm hoàn chỉnh, nhỏ gọn kết hợp giữa trí tuệ nhân tạo (Machine Learning) và kinh doanh thông minh (BI) để giải quyết bài toán tuyển dụng:
-1. **AI/ML CV Matching**: Trích xuất kỹ năng bằng bộ từ điển Regex chuẩn hóa (28 kỹ năng), vector hóa văn bản bằng TF-IDF dựa trên tập tham chiếu nền (Reference Corpus), đo độ tương đồng văn bản Cosine Similarity (60%) và tỷ lệ kỹ năng đáp ứng (40%) để tính Matching Score khách quan.
+1. **AI/ML CV Matching & Skill Gaps**: Trích xuất kỹ năng bằng bộ từ điển Regex chuẩn hóa (28 kỹ năng), vector hóa văn bản bằng TF-IDF dựa trên tập tham chiếu nền (Reference Corpus), đo độ tương đồng văn bản Cosine Similarity (60%) và tỷ lệ kỹ năng đáp ứng (40%) để tính Matching Score khách quan. Hỗ trợ tải tệp CV thực tế (PDF/DOCX), nhập JD tùy chỉnh của người dùng, phân tích khoảng trống kỹ năng (Skill Gaps) và đề xuất tái cấu trúc Outline CV (6 phần cốt lõi).
 2. **Dashboard BI**: Trực quan hóa dữ liệu tuyển dụng qua 3 nhóm biểu đồ chuyên sâu: tương quan cung - cầu kỹ năng (có bộ lọc danh mục), xu hướng tiền lương theo thời gian (giải thích rõ Mean vs Median), phễu chuyển đổi tuyển dụng nhất quán, biểu đồ phân bố việc làm & lương theo chuyên môn và hệ thống nhận xét BI tự động sinh bằng quy tắc (Rule-based Insights).
-3. **Kiểm thử & Đánh giá**: Tích hợp 12 bài kiểm thử tự động `pytest` và đánh giá các chỉ số Accuracy, Precision, Recall, F1 trên tập 12 cặp CV/JD gán nhãn thực nghiệm.
+3. **Kiểm thử & Đánh giá**: Tích hợp 17 bài kiểm thử tự động `pytest` (bao gồm trích xuất file PDF/DOCX, custom JD, skill gaps, logic phễu) và đánh giá các chỉ số Accuracy, Precision, Recall, F1 trên tập 12 cặp CV/JD gán nhãn thực nghiệm.
 
 ---
 
@@ -37,13 +37,15 @@ Group8-SmartHire/
 │   │   ├── models.py           # 7 thực thể SQLAlchemy (ERD)
 │   │   ├── schemas.py          # Pydantic Schemas request/response
 │   │   ├── ml_service.py       # Engine TF-IDF + Cosine Sim + Skill Extractor
+│   │   ├── cv_parser.py        # Trích xuất văn bản từ PDF và DOCX
+│   │   ├── skill_gap_service.py# Phân tích Skill Gaps & Đề xuất Outline CV
 │   │   ├── bi_service.py       # Tính toán BI: Skills, Salaries, Funnel, Domains, Insights
 │   │   ├── seed_data.py        # Seed 20 ứng viên, 5 NTD, 15 jobs, 40 apps, 28 skills
 │   │   ├── ground_truth.py     # 12 cặp CV/JD có nhãn Ground Truth
 │   │   └── main.py             # FastAPI REST endpoints
 │   ├── tests/
 │   │   ├── __init__.py
-│   │   └── test_system.py      # 12 bài kiểm thử tự động pytest
+│   │   └── test_system.py      # 17 bài kiểm thử tự động pytest
 │   ├── run_seed.py             # Script nạp database độc lập
 │   └── smarthire.db            # Cơ sở dữ liệu SQLite
 ├── frontend/
@@ -113,7 +115,7 @@ npm run dev
 
 ## 🧪 CHẠY BỘ KIỂM THỬ (AUTOMATED TESTING)
 
-Chạy 12 bài kiểm thử tự động trực tiếp qua terminal:
+Chạy 17 bài kiểm thử tự động trực tiếp qua terminal:
 ```powershell
 .\venv\Scripts\python -m pytest backend/tests/test_system.py -v
 ```

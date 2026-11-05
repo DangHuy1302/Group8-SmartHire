@@ -225,3 +225,129 @@ def test_evaluation_metrics_and_no_faking():
     )
     assert total_samples == 12
 
+
+# ----------------------------------------------------
+# 5. KIỂM THỬ NÂNG CẤP: FILE EXTRACTION, CUSTOM JD, SKILL GAPS & OUTLINE
+# ----------------------------------------------------
+def test_cv_file_extraction_docx():
+    """Test 13: Trích xuất nội dung từ tệp DOCX thực tế và xử lý định dạng không hợp lệ"""
+    import io
+    from docx import Document
+
+    # Tạo file docx trong bộ nhớ
+    doc = Document()
+    doc.add_paragraph("Kỹ sư Backend 3 năm kinh nghiệm với Python, FastAPI, PostgreSQL và Docker.")
+    docx_io = io.BytesIO()
+    doc.save(docx_io)
+    docx_io.seek(0)
+
+    files = {"file": ("my_resume.docx", docx_io.getvalue(), "application/vnd.openxmlformats-officedocument.wordprocessingml.document")}
+    res = client.post("/api/v1/cv/extract-text", files=files)
+    assert res.status_code == 200
+    data = res.json()
+    assert "FastAPI" in data["text"]
+    assert data["file_type"] == "DOCX"
+    assert data["word_count"] > 0
+
+    # Thử file đuôi không hợp lệ
+    bad_file = {"file": ("malicious.exe", b"binarycontent", "application/octet-stream")}
+    res_bad = client.post("/api/v1/cv/extract-text", files=bad_file)
+    assert res_bad.status_code == 400
+
+
+def test_cv_file_extraction_pdf_valid_and_scanned():
+    """Test 14: Trích xuất văn bản từ PDF có text layer và bắt lỗi OCR với PDF scan/rỗng"""
+    import io
+    from reportlab.pdfgen import canvas
+    from pypdf import PdfWriter
+
+    # 1. PDF có text layer hợp lệ
+    pdf_io = io.BytesIO()
+    c = canvas.Canvas(pdf_io)
+    c.drawString(100, 750, "Le Hoang Cuong - Data Analyst Specialist")
+    c.drawString(100, 730, "Skills: Python, SQL, Pandas, Business Intelligence")
+    c.save()
+    valid_pdf_bytes = pdf_io.getvalue()
+
+    files = {"file": ("resume_data_analyst.pdf", valid_pdf_bytes, "application/pdf")}
+    res = client.post("/api/v1/cv/extract-text", files=files)
+    assert res.status_code == 200
+    data = res.json()
+    assert data["file_type"] == "PDF"
+    assert "Python" in data["text"]
+    assert data["char_count"] > 0
+
+    # 2. PDF không có text layer (file scan/rỗng)
+    writer = PdfWriter()
+    writer.add_blank_page(width=100, height=100)
+    empty_pdf_io = io.BytesIO()
+    writer.write(empty_pdf_io)
+    empty_pdf_bytes = empty_pdf_io.getvalue()
+
+    files_empty = {"file": ("scan_image.pdf", empty_pdf_bytes, "application/pdf")}
+    res_empty = client.post("/api/v1/cv/extract-text", files=files_empty)
+    assert res_empty.status_code == 400
+    assert "OCR" in res_empty.json()["detail"]
+
+
+def test_custom_jd_matching_api():
+    """Test 14: Phân tích so khớp với JD tùy chỉnh thực sự (Custom JD)"""
+    payload = {
+        "cv_text": "Lập trình viên Frontend thành thạo React, TypeScript, HTML/CSS và Tailwind CSS.",
+        "job_title": "Senior Frontend React Developer",
+        "employer_name": "Công ty Khởi nghiệp ABC",
+        "description": "Tuyển dụng lập trình viên React có kinh nghiệm với Next.js và Tailwind CSS.",
+        "required_skills": ["React", "TypeScript", "Next.js", "Tailwind CSS"],
+        "weight_tfidf": 0.6,
+        "weight_skills": 0.4
+    }
+    response = client.post("/api/v1/matching/analyze-custom", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["is_custom_jd"] is True
+    assert data["job_title"] == "Senior Frontend React Developer"
+    assert data["matching_score"] > 50.0
+    assert "React" in data["matched_skills"]
+    assert "TypeScript" in data["matched_skills"]
+    assert "Next.js" in data["missing_skills"]
+    assert len(data["skill_gaps"]) >= 1
+    assert len(data["cv_outline_recommendations"]) == 6
+
+
+def test_skill_gaps_content_and_honesty():
+    """Test 15: Kiểm tra tính trung thực của Skill Gaps (không bịa kỹ năng thiếu, dùng nhãn khách quan)"""
+    from app.skill_gap_service import generate_skill_gaps
+    
+    # Nếu chỉ thiếu 1 kỹ năng -> chỉ trả về đúng 1 khoảng trống
+    gaps_single = generate_skill_gaps(["Docker"], "DevOps Engineer", max_gaps=5)
+    assert len(gaps_single) == 1
+    assert gaps_single[0]["skill_name"] == "Docker"
+    assert gaps_single[0]["status_label"] == "Chưa tìm thấy minh chứng trong CV"
+    assert len(gaps_single[0]["importance"]) > 0
+
+    # Nếu không thiếu kỹ năng nào -> trả về danh sách rỗng
+    gaps_none = generate_skill_gaps([], "Fullstack Developer")
+    assert len(gaps_none) == 0
+
+
+def test_cv_outline_recommendations_structure():
+    """Test 16: Kiểm tra cấu trúc 6 phần cốt lõi của đề xuất cải thiện Outline CV"""
+    from app.skill_gap_service import generate_cv_outline_recommendations
+    
+    outline = generate_cv_outline_recommendations(
+        cv_skills=["Python", "FastAPI"],
+        matched_skills=["Python", "FastAPI"],
+        missing_skills=["Docker"],
+        job_title="Python Backend Engineer",
+        employer_name="VNG"
+    )
+    assert len(outline) == 6
+    section_ids = [s["section_id"] for s in outline]
+    assert "contact_info" in section_ids
+    assert "professional_summary" in section_ids
+    assert "technical_skills" in section_ids
+    assert "featured_projects" in section_ids
+    assert "work_experience" in section_ids
+    assert "education_certifications" in section_ids
+
+

@@ -6,7 +6,9 @@ import {
   CandidateSimple,
   CandidateDetail,
   MatchRequest,
+  CustomJobMatchRequest,
   MatchResponse,
+  CVExtractResponse,
   BIDashboardData,
   EvaluationSummary
 } from '../types';
@@ -46,6 +48,22 @@ export const api = {
 
   analyzeMatch: async (req: MatchRequest): Promise<MatchResponse> => {
     const res = await apiClient.post<MatchResponse>('/matching/analyze', req);
+    return res.data;
+  },
+
+  analyzeCustomMatch: async (req: CustomJobMatchRequest): Promise<MatchResponse> => {
+    const res = await apiClient.post<MatchResponse>('/matching/analyze-custom', req);
+    return res.data;
+  },
+
+  extractCVText: async (file: File): Promise<CVExtractResponse> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await apiClient.post<CVExtractResponse>('/cv/extract-text', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return res.data;
   },
 
